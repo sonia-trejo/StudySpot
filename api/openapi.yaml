@@ -1,0 +1,751 @@
+openapi: 3.0.3
+info:
+  title: StudySpot API
+  description: API for managing study spots and reviews
+  version: 1.0.0
+  contact:
+    name: StudySpot Team
+    email: support@studyspot.com
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://api.studyspot.com
+    description: Production server
+
+paths:
+  /api/health:
+    get:
+      summary: Health check endpoint
+      description: Returns the current status of the API service
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: 2024-01-01T12:00:00Z
+                  service:
+                    type: string
+                    example: StudySpot API
+              example:
+                status: OK
+                timestamp: 2024-01-01T12:00:00Z
+                service: StudySpot API
+
+  /api/study-spots:
+    get:
+      summary: Get all study spots
+      description: Retrieve a paginated list of study spots with optional filtering and sorting
+      tags:
+        - Study Spots
+      parameters:
+        - name: search
+          in: query
+          description: Search term to filter study spots by name
+          schema:
+            type: string
+          example: Library
+        - name: noise_level
+          in: query
+          description: Filter by noise level
+          schema:
+            type: string
+            enum: [quiet, moderate, loud]
+          example: quiet
+        - name: wifi_available
+          in: query
+          description: Filter by WiFi availability
+          schema:
+            type: boolean
+          example: true
+        - name: power_outlets
+          in: query
+          description: Filter by power outlet availability
+          schema:
+            type: boolean
+          example: true
+        - name: sort_by
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            enum: [name, rating, created_at, capacity]
+            default: name
+          example: rating
+        - name: order
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          example: desc
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          example: 10
+      responses:
+        '200':
+          description: Successfully retrieved study spots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  study_spots:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StudySpot'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                study_spots:
+                  - id: 1
+                    name: University Library - 3rd Floor
+                    location: Main Campus, Building A
+                    description: Quiet study area with individual carrels
+                    capacity: 45
+                    amenities: WiFi, Power outlets, Printers
+                    noise_level: quiet
+                    wifi_available: true
+                    power_outlets: true
+                    average_rating: 4.5
+                    review_count: 12
+                    created_at: 2024-01-01T12:00:00Z
+                pagination:
+                  page: 1
+                  limit: 10
+                  total: 25
+                  pages: 3
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new study spot
+      description: Add a new study spot to the database
+      tags:
+        - Study Spots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudySpotInput'
+            example:
+              name: Coffee Shop Study Corner
+              location: Downtown Cafe, 123 Main St
+              description: Cozy corner with good lighting and background music
+              capacity: 15
+              amenities: WiFi, Coffee, Snacks
+              noise_level: moderate
+              wifi_available: true
+              power_outlets: true
+      responses:
+        '201':
+          description: Study spot created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudySpot'
+              example:
+                id: 6
+                name: Coffee Shop Study Corner
+                location: Downtown Cafe, 123 Main St
+                description: Cozy corner with good lighting and background music
+                capacity: 15
+                amenities: WiFi, Coffee, Snacks
+                noise_level: moderate
+                wifi_available: true
+                power_outlets: true
+                created_at: 2024-01-01T12:00:00Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/study-spots/{id}:
+    get:
+      summary: Get a specific study spot
+      description: Retrieve detailed information about a specific study spot including reviews
+      tags:
+        - Study Spots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Study spot ID
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Successfully retrieved study spot
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/StudySpot'
+                  - type: object
+                    properties:
+                      reviews:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Review'
+                      rating_breakdown:
+                        type: object
+                        properties:
+                          '1':
+                            type: integer
+                            example: 2
+                          '2':
+                            type: integer
+                            example: 3
+                          '3':
+                            type: integer
+                            example: 5
+                          '4':
+                            type: integer
+                            example: 8
+                          '5':
+                            type: integer
+                            example: 12
+                      average_rating:
+                        type: number
+                        format: float
+                        example: 4.2
+                      review_count:
+                        type: integer
+                        example: 30
+              example:
+                id: 1
+                name: University Library - 3rd Floor
+                location: Main Campus, Building A
+                description: Quiet study area with individual carrels
+                capacity: 45
+                amenities: WiFi, Power outlets, Printers
+                noise_level: quiet
+                wifi_available: true
+                power_outlets: true
+                reviews:
+                  - id: 1
+                    location_id: 1
+                    rating: 5
+                    noise_level: quiet
+                    wifi_quality: excellent
+                    outlets: plenty
+                    crowding: low
+                    time_visited: afternoon
+                    visit_type: solo
+                    comment: Perfect for focused studying!
+                    created_at: 2024-01-01T12:00:00Z
+                rating_breakdown:
+                  '1': 2
+                  '2': 3
+                  '3': 5
+                  '4': 8
+                  '5': 12
+                average_rating: 4.2
+                review_count: 30
+                created_at: 2024-01-01T12:00:00Z
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/reviews:
+    get:
+      summary: Get reviews
+      description: Retrieve a paginated list of reviews with optional filtering
+      tags:
+        - Reviews
+      parameters:
+        - name: location_id
+          in: query
+          description: Filter by study spot ID
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+        - name: min_rating
+          in: query
+          description: Minimum rating filter
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          example: 4
+        - name: max_rating
+          in: query
+          description: Maximum rating filter
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          example: 5
+        - name: sort_by
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            enum: [created_at, rating, location_id]
+            default: created_at
+          example: rating
+        - name: order
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          example: desc
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          example: 10
+      responses:
+        '200':
+          description: Successfully retrieved reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Review'
+                        - type: object
+                          properties:
+                            study_spots:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  example: University Library
+                                location:
+                                  type: string
+                                  example: Main Campus
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                reviews:
+                  - id: 1
+                    location_id: 1
+                    rating: 5
+                    noise_level: quiet
+                    wifi_quality: excellent
+                    outlets: plenty
+                    crowding: low
+                    time_visited: afternoon
+                    visit_type: solo
+                    comment: Perfect for focused studying!
+                    study_spots:
+                      name: University Library
+                      location: Main Campus
+                    created_at: 2024-01-01T12:00:00Z
+                pagination:
+                  page: 1
+                  limit: 10
+                  total: 50
+                  pages: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new review
+      description: Add a new review for a study spot
+      tags:
+        - Reviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewInput'
+            example:
+              location_id: 1
+              rating: 5
+              noise_level: quiet
+              wifi_quality: excellent
+              outlets: plenty
+              crowding: low
+              time_visited: afternoon
+              visit_type: solo
+              comment: Great place to study!
+      responses:
+        '201':
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+              example:
+                id: 51
+                location_id: 1
+                rating: 5
+                noise_level: quiet
+                wifi_quality: excellent
+                outlets: plenty
+                crowding: low
+                time_visited: afternoon
+                visit_type: solo
+                comment: Great place to study!
+                created_at: 2024-01-01T12:00:00Z
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Study spot not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Study spot not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    StudySpot:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the study spot
+          example: 1
+        name:
+          type: string
+          description: Name of the study spot
+          example: University Library - 3rd Floor
+        location:
+          type: string
+          description: Physical location/address
+          example: Main Campus, Building A
+        description:
+          type: string
+          description: Detailed description of the study spot
+          example: Quiet study area with individual carrels and group study rooms
+        capacity:
+          type: integer
+          description: Maximum capacity of the study spot
+          example: 45
+        amenities:
+          type: string
+          description: Available amenities
+          example: WiFi, Power outlets, Printers, Whiteboards
+        noise_level:
+          type: string
+          enum: [quiet, moderate, loud]
+          description: Typical noise level
+          example: quiet
+        wifi_available:
+          type: boolean
+          description: Whether WiFi is available
+          example: true
+        power_outlets:
+          type: boolean
+          description: Whether power outlets are available
+          example: true
+        average_rating:
+          type: number
+          format: float
+          description: Average rating from reviews
+          example: 4.5
+        review_count:
+          type: integer
+          description: Number of reviews
+          example: 12
+        created_at:
+          type: string
+          format: date-time
+          description: When the study spot was created
+          example: 2024-01-01T12:00:00Z
+
+    StudySpotInput:
+      type: object
+      required:
+        - name
+        - location
+        - description
+        - capacity
+        - noise_level
+        - wifi_available
+        - power_outlets
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Name of the study spot
+          example: Coffee Shop Study Corner
+        location:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Physical location/address
+          example: Downtown Cafe, 123 Main St
+        description:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          description: Detailed description of the study spot
+          example: Cozy corner with good lighting and background music
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum capacity of the study spot
+          example: 15
+        amenities:
+          type: string
+          maxLength: 500
+          description: Available amenities
+          example: WiFi, Coffee, Snacks
+        noise_level:
+          type: string
+          enum: [quiet, moderate, loud]
+          description: Typical noise level
+          example: moderate
+        wifi_available:
+          type: boolean
+          description: Whether WiFi is available
+          example: true
+        power_outlets:
+          type: boolean
+          description: Whether power outlets are available
+          example: true
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the review
+          example: 1
+        location_id:
+          type: integer
+          description: ID of the study spot being reviewed
+          example: 1
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Star rating (1-5)
+          example: 5
+        noise_level:
+          type: string
+          enum: [very-quiet, quiet, moderate, loud, very-loud]
+          description: Noise level during visit
+          example: quiet
+        wifi_quality:
+          type: string
+          enum: [excellent, good, fair, poor, none]
+          description: WiFi quality during visit
+          example: excellent
+        outlets:
+          type: string
+          enum: [plenty, some, few, none]
+          description: Outlet availability during visit
+          example: plenty
+        crowding:
+          type: string
+          enum: [empty, low, moderate, busy, very-busy]
+          description: How crowded the place was during visit
+          example: low
+        time_visited:
+          type: string
+          enum: [morning, afternoon, evening, night]
+          description: Time of day of the visit
+          example: afternoon
+        visit_type:
+          type: string
+          enum: [solo, group, both]
+          description: Type of visit
+          example: solo
+        comment:
+          type: string
+          maxLength: 1000
+          description: Optional comment about the experience
+          example: Perfect for focused studying!
+        created_at:
+          type: string
+          format: date-time
+          description: When the review was created
+          example: 2024-01-01T12:00:00Z
+
+    ReviewInput:
+      type: object
+      required:
+        - location_id
+        - rating
+        - noise_level
+        - wifi_quality
+        - outlets
+        - crowding
+        - time_visited
+        - visit_type
+      properties:
+        location_id:
+          type: integer
+          minimum: 1
+          description: ID of the study spot being reviewed
+          example: 1
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Star rating (1-5)
+          example: 5
+        noise_level:
+          type: string
+          enum: [very-quiet, quiet, moderate, loud, very-loud]
+          description: Noise level during visit
+          example: quiet
+        wifi_quality:
+          type: string
+          enum: [excellent, good, fair, poor, none]
+          description: WiFi quality during visit
+          example: excellent
+        outlets:
+          type: string
+          enum: [plenty, some, few, none]
+          description: Outlet availability during visit
+          example: plenty
+        crowding:
+          type: string
+          enum: [empty, low, moderate, busy, very-busy]
+          description: How crowded the place was during visit
+          example: low
+        time_visited:
+          type: string
+          enum: [morning, afternoon, evening, night]
+          description: Time of day of the visit
+          example: afternoon
+        visit_type:
+          type: string
+          enum: [solo, group, both]
+          description: Type of visit
+          example: solo
+        comment:
+          type: string
+          maxLength: 1000
+          description: Optional comment about the experience
+          example: Great place to study!
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          description: Number of items per page
+          example: 10
+        total:
+          type: integer
+          description: Total number of items
+          example: 25
+        pages:
+          type: integer
+          description: Total number of pages
+          example: 3
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Bad Request
+        details:
+          type: array
+          items:
+            type: string
+          description: Detailed error messages
+          example:
+            - Name is required
+            - Rating must be between 1 and 5
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Validation failed
+            details:
+              - Name is required
+              - Rating must be between 1 and 5
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Study spot not found
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Internal Server Error
+            message: Something went wrong
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Study Spots
+    description: Study spot management
+  - name: Reviews
+    description: Review management
