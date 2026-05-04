@@ -1,0 +1,11 @@
+{
+  "name": "studyspot",
+  "version": "1.0.0",
+  "description": "StudySpot - Find the perfect study spot",
+  "scripts": {
+    "build": "cd client && npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
