@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
+import { authService } from '../services/auth'
 
 const Review = () => {
   const navigate = useNavigate()
@@ -22,6 +23,37 @@ const Review = () => {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
   const [authData, setAuthData] = useState({ email: '', password: '', confirmPassword: '' })
   const [isSignUpMode, setIsSignUpMode] = useState(false)
+  const [authError, setAuthError] = useState('')
+  const [user, setUser] = useState(null)
+  const [studySpots, setStudySpots] = useState([])
+  const [loadingSpots, setLoadingSpots] = useState(true)
+  
+  useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      try {
+        const currentUser = await authService.getCurrentUser()
+        setUser(currentUser)
+      } catch (error) {
+        console.error('Error checking auth:', error)
+      }
+    }
+    
+    // Load study spots for selection
+    const loadStudySpots = async () => {
+      try {
+        const response = await apiService.getStudySpots()
+        setStudySpots(response.study_spots || [])
+      } catch (error) {
+        console.error('Error loading study spots:', error)
+      } finally {
+        setLoadingSpots(false)
+      }
+    }
+    
+    checkAuth()
+    loadStudySpots()
+  }, [])
 
   const validateForm = () => {
     const newErrors = {}
@@ -100,50 +132,19 @@ const Review = () => {
     e.preventDefault()
     
     if (validateForm()) {
-      // Show authentication prompt before submitting
-      setShowAuthPrompt(true)
+      // If user is already authenticated, submit directly
+      if (user) {
+        await submitReview()
+      } else {
+        // Show authentication prompt before submitting
+        setShowAuthPrompt(true)
+      }
     }
   }
-
-  const handleAuthSubmit = async () => {
+  
+  const submitReview = async () => {
     try {
       setIsSubmitting(true)
-      
-      // Validate auth form
-      if (!authData.email || !authData.password) {
-        setErrors({ submit: 'Please fill in all required fields.' })
-        return
-      }
-      
-      if (isSignUpMode && authData.password !== authData.confirmPassword) {
-        setErrors({ submit: 'Passwords do not match.' })
-        return
-      }
-      
-      // Authenticate with Supabase
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        'https://qeqpwqdnwbjsgldiorte.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjM4NDYsImV4cCI6MjA5MzEzOTg0Nn0.Ea3GLnoqhoAmzMUF2DK2iDLoqPYr_0_LHeuyUIslzmo'
-      )
-      
-      let authResult
-      if (isSignUpMode) {
-        authResult = await supabase.auth.signUp({
-          email: authData.email,
-          password: authData.password
-        })
-      } else {
-        authResult = await supabase.auth.signInWithPassword({
-          email: authData.email,
-          password: authData.password
-        })
-      }
-      
-      if (authResult.error) {
-        setErrors({ submit: authResult.error.message })
-        return
-      }
       
       // Map form data to API format
       const reviewData = {
@@ -167,6 +168,44 @@ const Review = () => {
     } finally {
       setIsSubmitting(false)
       setShowAuthPrompt(false)
+    }
+  }
+
+  const handleAuthSubmit = async () => {
+    try {
+      setIsSubmitting(true)
+      setAuthError('')
+      
+      // Validate auth form
+      if (!authData.email || !authData.password) {
+        setAuthError('Please fill in all required fields.')
+        return
+      }
+      
+      if (isSignUpMode && authData.password !== authData.confirmPassword) {
+        setAuthError('Passwords do not match.')
+        return
+      }
+      
+      // Authenticate with Supabase
+      let authResult
+      if (isSignUpMode) {
+        authResult = await authService.signUp(authData.email, authData.password)
+        setAuthError('Check your email to confirm your account')
+        return
+      } else {
+        authResult = await authService.signIn(authData.email, authData.password)
+      }
+      
+      // Authentication successful, submit the review
+      setUser(authResult.user)
+      await submitReview()
+      
+    } catch (error) {
+      console.error('Authentication error:', error)
+      setAuthError(error.message || 'Authentication failed. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
   
@@ -208,13 +247,14 @@ const Review = () => {
             value={formData.location_id}
             onChange={(e) => setFormData(prev => ({ ...prev, location_id: e.target.value }))}
             className={errors.location_id ? 'error' : ''}
+            disabled={loadingSpots}
           >
-            <option value="">Select a study spot</option>
-            <option value="1">University Library - 3rd Floor</option>
-            <option value="2">Student Union Coffee Shop</option>
-            <option value="3">Engineering Computer Lab</option>
-            <option value="4">Campus Green Space</option>
-            <option value="5">Medical Study Lounge</option>
+            <option value="">{loadingSpots ? 'Loading study spots...' : 'Select a study spot'}</option>
+            {studySpots.map((spot) => (
+              <option key={spot.id} value={spot.id}>
+                {spot.name}
+              </option>
+            ))}
           </select>
           {errors.location_id && <span className="error-message">{errors.location_id}</span>}
         </div>

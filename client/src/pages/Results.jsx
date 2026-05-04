@@ -133,7 +133,6 @@ const Results = () => {
               <option value="name">Name</option>
               <option value="rating">Highest Rated</option>
               <option value="created_at">Newest</option>
-              <option value="capacity">Capacity</option>
             </select>
           </div>
 
@@ -253,7 +252,7 @@ const Results = () => {
                 <div className="result-details">
                   <div className="detail-item">
                     <span className="detail-label">Capacity:</span>
-                    <span className="detail-value">{spot.capacity} people</span>
+                    <span className="detail-value">{spot.capacity || 'N/A'}</span>
                   </div>
                   {spot.amenities && (
                     <div className="detail-item">

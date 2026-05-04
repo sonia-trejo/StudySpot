@@ -1,11 +1,38 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { authService } from '../services/auth'
 
 const Navigation = () => {
   const location = useLocation()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [user, setUser] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [isSignUpMode, setIsSignUpMode] = useState(false)
+  const [authLoading, setAuthLoading] = useState(false)
+  const [authError, setAuthError] = useState('')
+  
+  useEffect(() => {
+    // Check current auth state
+    const checkAuth = async () => {
+      try {
+        const currentUser = await authService.getCurrentUser()
+        setUser(currentUser)
+        setIsLoggedIn(!!currentUser)
+      } catch (error) {
+        console.error('Error checking auth state:', error)
+      }
+    }
+    
+    checkAuth()
+    
+    // Listen to auth changes
+    const { data: { subscription } } = authService.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+      setIsLoggedIn(!!session?.user)
+    })
+    
+    return () => subscription.unsubscribe()
+  }, [])
   
   const isActive = (path) => {
     if (path === '/') {
@@ -14,28 +41,60 @@ const Navigation = () => {
     return location.pathname.startsWith(path)
   }
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
-    // Mock login - in real app would authenticate
-    setIsLoggedIn(true)
-    setShowLoginModal(false)
-    setIsSignUpMode(false)
+    const formData = new FormData(e.target)
+    const email = formData.get('email')
+    const password = formData.get('password')
+    
+    try {
+      setAuthLoading(true)
+      setAuthError('')
+      await authService.signIn(email, password)
+      setShowLoginModal(false)
+      setIsSignUpMode(false)
+    } catch (error) {
+      setAuthError(error.message || 'Login failed. Please try again.')
+    } finally {
+      setAuthLoading(false)
+    }
   }
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault()
-    // Mock sign up - in real app would register user
-    setIsLoggedIn(true)
-    setShowLoginModal(false)
-    setIsSignUpMode(false)
+    const formData = new FormData(e.target)
+    const email = formData.get('email')
+    const password = formData.get('password')
+    const confirmPassword = formData.get('confirmPassword')
+    
+    if (password !== confirmPassword) {
+      setAuthError('Passwords do not match')
+      return
+    }
+    
+    try {
+      setAuthLoading(true)
+      setAuthError('')
+      await authService.signUp(email, password)
+      setAuthError('Check your email to confirm your account')
+      setIsSignUpMode(false)
+    } catch (error) {
+      setAuthError(error.message || 'Sign up failed. Please try again.')
+    } finally {
+      setAuthLoading(false)
+    }
   }
 
   const toggleAuthMode = () => {
     setIsSignUpMode(!isSignUpMode)
   }
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
+  const handleLogout = async () => {
+    try {
+      await authService.signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   return (
@@ -77,13 +136,13 @@ const Navigation = () => {
         <div className="nav-auth">
           {isLoggedIn ? (
             <div className="user-menu">
-              <span className="user-name">👤 User</span>
+              <span className="user-name">👤 {user?.email || 'User'}</span>
               <button className="btn btn-outline" onClick={handleLogout}>
                 Logout
               </button>
             </div>
           ) : (
-            location.pathname === '/review' && (
+            (location.pathname === '/review' || location.pathname === '/moderation') && (
               <button 
                 className="btn btn-primary" 
                 onClick={() => setShowLoginModal(true)}
@@ -112,13 +171,21 @@ const Navigation = () => {
             </div>
             
             <form onSubmit={isSignUpMode ? handleSignUp : handleLogin} className="login-form">
+              {authError && (
+                <div className="auth-error">
+                  {authError}
+                </div>
+              )}
+              
               <div className="form-group">
                 <label htmlFor="email">Email</label>
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   placeholder="Enter your email"
                   required
+                  disabled={authLoading}
                 />
               </div>
               
@@ -127,8 +194,10 @@ const Navigation = () => {
                 <input
                   type="password"
                   id="password"
+                  name="password"
                   placeholder="Enter your password"
                   required
+                  disabled={authLoading}
                 />
               </div>
               
@@ -138,15 +207,17 @@ const Navigation = () => {
                   <input
                     type="password"
                     id="confirmPassword"
+                    name="confirmPassword"
                     placeholder="Confirm your password"
                     required
+                    disabled={authLoading}
                   />
                 </div>
               )}
               
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
-                  {isSignUpMode ? 'Sign Up' : 'Login'}
+                <button type="submit" className="btn btn-primary" disabled={authLoading}>
+                  {authLoading ? 'Loading...' : (isSignUpMode ? 'Sign Up' : 'Login')}
                 </button>
                 <button 
                   type="button" 
@@ -154,7 +225,9 @@ const Navigation = () => {
                   onClick={() => {
                     setShowLoginModal(false)
                     setIsSignUpMode(false)
+                    setAuthError('')
                   }}
+                  disabled={authLoading}
                 >
                   Cancel
                 </button>
@@ -167,7 +240,11 @@ const Navigation = () => {
                 <button 
                   type="button"
                   className="link-btn" 
-                  onClick={toggleAuthMode}
+                  onClick={() => {
+                    setIsSignUpMode(!isSignUpMode)
+                    setAuthError('')
+                  }}
+                  disabled={authLoading}
                 >
                   {isSignUpMode ? 'Login' : 'Sign up'}
                 </button>

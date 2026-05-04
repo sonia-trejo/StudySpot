@@ -1,0 +1,27 @@
+{
+  "name": "StudySpot - Find Your Perfect Study Location",
+  "short_name": "StudySpot",
+  "description": "A mobile-first web app that helps students find study-friendly locations based on real user-submitted data",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "utilities", "productivity"],
+  "lang": "en-US"
+}
