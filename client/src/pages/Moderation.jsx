@@ -84,6 +84,22 @@ const Moderation = () => {
   const activeReviews = reviews.filter(review => review.status !== 'flagged')
   const flaggedReviews = reviews.filter(review => review.status === 'flagged')
 
+  // Show message if no reviews exist
+  if (reviews.length === 0 && !loading) {
+    return (
+      <div className="moderation-page">
+        <h1>Review Moderation</h1>
+        <div className="no-reviews">
+          <h2>No Reviews Yet</h2>
+          <p>No reviews have been submitted yet. Reviews will appear here once users start submitting feedback about study spots.</p>
+          <Link to="/review" className="btn btn-primary">
+            Write First Review
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="moderation-page">
       <h1>Review Moderation</h1>
