@@ -1,17 +1,48 @@
 import { useState, useEffect } from 'react'
 
 const MapView = ({ studySpots, onSpotClick, userLocation }) => {
-  const [mapLoaded, setMapLoaded] = useState(true) // Set to true immediately
+  const [mapLoaded, setMapLoaded] = useState(true)
 
   useEffect(() => {
-    // Map loads immediately now
     setMapLoaded(true)
   }, [])
+
+  // Calculate relative positions for study spots based on coordinates
+  const getMarkerPosition = (spot, index, total) => {
+    if (!spot.latitude || !spot.longitude) {
+      // Fallback positioning for spots without coordinates
+      const angle = (index / total) * 2 * Math.PI
+      const radius = 30
+      return {
+        left: `${50 + radius * Math.cos(angle)}%`,
+        top: `${50 + radius * Math.sin(angle)}%`
+      }
+    }
+
+    // If we have a user location, position spots relative to it
+    if (userLocation && userLocation.latitude && userLocation.longitude) {
+      // Simple relative positioning based on distance and direction
+      const latDiff = (spot.latitude - userLocation.latitude) * 1000
+      const lonDiff = (spot.longitude - userLocation.longitude) * 1000
+      
+      return {
+        left: `${50 + lonDiff}%`,
+        top: `${50 - latDiff}%`
+      }
+    }
+
+    // Default circular arrangement
+    const angle = (index / total) * 2 * Math.PI
+    const radius = 25
+    return {
+      left: `${50 + radius * Math.cos(angle)}%`,
+      top: `${50 + radius * Math.sin(angle)}%`
+    }
+  }
 
   return (
     <div className="map-container">
       <div className="map-wrapper">
-        {/* Simple static map visualization */}
         <div className="static-map">
           <div className="map-background">
             {/* User location marker */}
@@ -23,7 +54,7 @@ const MapView = ({ studySpots, onSpotClick, userLocation }) => {
                   top: '50%',
                   transform: 'translate(-50%, -50%)'
                 }}
-                title="Your location"
+                title={`Your location: ${userLocation.displayName || userLocation.city || 'Searched location'}`}
               >
                 📍
               </div>
@@ -31,22 +62,13 @@ const MapView = ({ studySpots, onSpotClick, userLocation }) => {
             
             {/* Study spot markers */}
             {studySpots.map((spot, index) => {
-              // Simple positioning based on index for demo
-              const positions = [
-                { left: '30%', top: '30%' },
-                { left: '70%', top: '25%' },
-                { left: '45%', top: '60%' },
-                { left: '75%', top: '70%' },
-                { left: '25%', top: '75%' }
-              ]
-              
-              const pos = positions[index % positions.length]
+              const position = getMarkerPosition(spot, index, studySpots.length)
               
               return (
                 <div
                   key={spot.id}
                   className="map-marker spot-marker"
-                  style={pos}
+                  style={position}
                   onClick={() => onSpotClick && onSpotClick(spot)}
                   title={spot.name}
                 >

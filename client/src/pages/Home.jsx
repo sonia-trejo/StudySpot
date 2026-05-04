@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import { getCurrentLocation, filterNearbyLocations } from '../utils/geolocation'
+import { geocodeLocation, findNearbyStudySpots } from '../utils/geocoding'
 import MapView from '../components/MapView'
 import { testAPIConnection } from '../utils/api-test'
 
@@ -64,9 +65,23 @@ const Home = () => {
     try {
       setLocationSearching(true)
       
-      // Search for study spots by location
-      const response = await apiService.getStudySpots({ search: locationInput })
-      setNearbySpots(response.study_spots || [])
+      // Geocode the location to get coordinates
+      const coordinates = await geocodeLocation(locationInput)
+      
+      // Get all study spots and find nearby ones
+      const response = await apiService.getStudySpots()
+      const allSpots = response.study_spots || []
+      
+      // Find spots within 25km of the searched location
+      const nearby = findNearbyStudySpots(
+        allSpots, 
+        coordinates.latitude, 
+        coordinates.longitude, 
+        25
+      )
+      
+      setNearbySpots(nearby)
+      setUserLocation(coordinates)
       setShowNearby(true)
       setViewMode('map') // Show map view for location search results
       
@@ -75,7 +90,7 @@ const Home = () => {
       
     } catch (err) {
       console.error('Error searching by location:', err)
-      alert('Unable to search for that location. Please try again.')
+      alert(err.message || 'Unable to search for that location. Please try again.')
     } finally {
       setLocationSearching(false)
     }
@@ -150,8 +165,8 @@ const Home = () => {
         
         {(userLocation || showNearby) && (
           <p className="location-info">
-            📍 {userLocation ? 'Location found!' : `Showing ${nearbySpots.length} study spots`}
-            {userLocation && ' Showing spots within 10km'}
+            📍 {userLocation ? `Found ${nearbySpots.length} study spots near ${userLocation.city || userLocation.displayName || locationInput}` : `Showing ${nearbySpots.length} study spots`}
+            {userLocation && ` within 25km`}
           </p>
         )}
       </div>
