@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import { getCurrentLocation, filterNearbyLocations } from '../utils/geolocation'
+// Import geocoding functions directly to ensure they're bundled
 import { geocodeLocation, findNearbyStudySpots } from '../utils/geocoding'
 import MapView from '../components/MapView'
 import { testAPIConnection } from '../utils/api-test'
@@ -65,20 +66,55 @@ const Home = () => {
     try {
       setLocationSearching(true)
       
-      // Geocode the location to get coordinates
-      const coordinates = await geocodeLocation(locationInput)
+      // Inline geocoding to ensure it's bundled
+      const geocodeResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationInput)}&limit=1`
+      );
+      
+      if (!geocodeResponse.ok) {
+        throw new Error('Geocoding failed');
+      }
+      
+      const geocodeData = await geocodeResponse.json();
+      
+      if (!geocodeData || geocodeData.length === 0) {
+        throw new Error('Location not found');
+      }
+      
+      const coordinates = {
+        latitude: parseFloat(geocodeData[0].lat),
+        longitude: parseFloat(geocodeData[0].lon),
+        displayName: geocodeData[0].display_name,
+        city: geocodeData[0].address?.city || geocodeData[0].address?.town || geocodeData[0].address?.village || locationInput
+      };
       
       // Get all study spots and find nearby ones
       const response = await apiService.getStudySpots()
       const allSpots = response.study_spots || []
       
       // Find spots within 25km of the searched location
-      const nearby = findNearbyStudySpots(
-        allSpots, 
-        coordinates.latitude, 
-        coordinates.longitude, 
-        25
-      )
+      const nearby = allSpots
+        .map(spot => {
+          if (!spot.latitude || !spot.longitude) return null;
+          
+          // Calculate distance
+          const R = 6371; // Earth's radius in km
+          const dLat = (spot.latitude - coordinates.latitude) * Math.PI / 180;
+          const dLon = (spot.longitude - coordinates.longitude) * Math.PI / 180;
+          const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(coordinates.latitude * Math.PI / 180) * Math.cos(spot.latitude * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = R * c;
+          
+          return {
+            ...spot,
+            distance: distance
+          };
+        })
+        .filter(spot => spot && spot.distance <= 25)
+        .sort((a, b) => a.distance - b.distance);
       
       setNearbySpots(nearby)
       setUserLocation(coordinates)
@@ -103,6 +139,7 @@ const Home = () => {
     // Test API connection in development
     if (import.meta.env.DEV) {
       testAPIConnection()
+      console.log('Geocoding functions available:', { geocodeLocation, findNearbyStudySpots })
     }
   }, [])
 

@@ -62,7 +62,7 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
-      throw new Error(`Failed to connect to API: ${error.message}. Please check your connection and try again.`);
+      throw new Error(`Failed to connect to API: ${error.message}. Please check your connection and try again.`, { cause: error });
     }
   }
 

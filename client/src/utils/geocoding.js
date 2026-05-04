@@ -25,7 +25,7 @@ export const geocodeLocation = async (locationQuery) => {
     throw new Error('Location not found');
   } catch (error) {
     console.error('Geocoding error:', error);
-    throw new Error('Unable to find location. Please try a different city or zip code.');
+    throw new Error('Unable to find location. Please try a different city or zip code.', { cause: error });
   }
 };
 
