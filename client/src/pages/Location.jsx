@@ -106,7 +106,7 @@ const Location = () => {
               <div className="info-icon-large">📍</div>
               <div className="info-content">
                 <h3>Location</h3>
-                <p className="info-value">{location.location}</p>
+                <p className="info-value">{location.location || 'Address not available'}</p>
               </div>
             </div>
             
@@ -122,7 +122,7 @@ const Location = () => {
               <div className="info-icon-large">👥</div>
               <div className="info-content">
                 <h3>Capacity</h3>
-                <p className="info-value">{location.capacity} people</p>
+                <p className="info-value">{location.capacity || 'N/A'} people</p>
               </div>
             </div>
             
@@ -130,7 +130,7 @@ const Location = () => {
               <div className="info-icon-large">🔇</div>
               <div className="info-content">
                 <h3>Noise Level</h3>
-                <p className="info-value">{location.noise_level}</p>
+                <p className="info-value">{location.noise_level || 'N/A'}</p>
               </div>
             </div>
             

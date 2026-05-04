@@ -20,7 +20,8 @@ const Review = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
-  const [authData, setAuthData] = useState({ email: '', password: '' })
+  const [authData, setAuthData] = useState({ email: '', password: '', confirmPassword: '' })
+  const [isSignUpMode, setIsSignUpMode] = useState(false)
 
   const validateForm = () => {
     const newErrors = {}
@@ -108,6 +109,42 @@ const Review = () => {
     try {
       setIsSubmitting(true)
       
+      // Validate auth form
+      if (!authData.email || !authData.password) {
+        setErrors({ submit: 'Please fill in all required fields.' })
+        return
+      }
+      
+      if (isSignUpMode && authData.password !== authData.confirmPassword) {
+        setErrors({ submit: 'Passwords do not match.' })
+        return
+      }
+      
+      // Authenticate with Supabase
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabase = createClient(
+        'https://qeqpwqdnwbjsgldiorte.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjM4NDYsImV4cCI6MjA5MzEzOTg0Nn0.Ea3GLnoqhoAmzMUF2DK2iDLoqPYr_0_LHeuyUIslzmo'
+      )
+      
+      let authResult
+      if (isSignUpMode) {
+        authResult = await supabase.auth.signUp({
+          email: authData.email,
+          password: authData.password
+        })
+      } else {
+        authResult = await supabase.auth.signInWithPassword({
+          email: authData.email,
+          password: authData.password
+        })
+      }
+      
+      if (authResult.error) {
+        setErrors({ submit: authResult.error.message })
+        return
+      }
+      
       // Map form data to API format
       const reviewData = {
         location_id: parseInt(formData.location_id),
@@ -131,6 +168,11 @@ const Review = () => {
       setIsSubmitting(false)
       setShowAuthPrompt(false)
     }
+  }
+  
+  const toggleAuthMode = () => {
+    setIsSignUpMode(!isSignUpMode)
+    setErrors({})
   }
 
   if (isSubmitted) {
@@ -378,7 +420,7 @@ const Review = () => {
         <div className="auth-modal-overlay">
           <div className="auth-modal">
             <div className="auth-modal-header">
-              <h2>Sign In to Submit Review</h2>
+              <h2>{isSignUpMode ? 'Sign Up to Submit Review' : 'Sign In to Submit Review'}</h2>
               <button 
                 type="button" 
                 className="close-btn" 
@@ -389,7 +431,7 @@ const Review = () => {
             </div>
             
             <div className="auth-modal-body">
-              <p>Please sign in to submit your review. Your feedback helps other students find great study spots!</p>
+              <p>{isSignUpMode ? 'Create an account to submit your review. Your feedback helps other students find great study spots!' : 'Please sign in to submit your review. Your feedback helps other students find great study spots!'}</p>
               
               <div className="auth-form">
                 <div className="form-group">
@@ -415,25 +457,52 @@ const Review = () => {
                     className="auth-input"
                   />
                 </div>
+                
+                {isSignUpMode && (
+                  <div className="form-group">
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      value={authData.confirmPassword}
+                      onChange={(e) => setAuthData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      placeholder="Confirm your password"
+                      className="auth-input"
+                    />
+                  </div>
+                )}
               </div>
             </div>
             
             <div className="auth-modal-footer">
-              <button 
-                type="button" 
-                className="btn btn-secondary" 
-                onClick={() => setShowAuthPrompt(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                type="button" 
-                className="btn btn-primary" 
-                onClick={handleAuthSubmit}
-                disabled={!authData.email || !authData.password || isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Sign In & Submit Review'}
-              </button>
+              <div className="auth-toggle">
+                <span>{isSignUpMode ? 'Already have an account?' : "Don't have an account?"}</span>
+                <button 
+                  type="button" 
+                  className="link-btn" 
+                  onClick={toggleAuthMode}
+                >
+                  {isSignUpMode ? 'Sign In' : 'Sign Up'}
+                </button>
+              </div>
+              
+              <div className="auth-actions">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowAuthPrompt(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary" 
+                  onClick={handleAuthSubmit}
+                  disabled={!authData.email || !authData.password || (isSignUpMode && !authData.confirmPassword) || isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : (isSignUpMode ? 'Sign Up & Submit Review' : 'Sign In & Submit Review')}
+                </button>
+              </div>
             </div>
           </div>
         </div>
