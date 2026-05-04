@@ -93,58 +93,75 @@ const Location = () => {
         </Link>
       </div>
 
-      {/* Enhanced main information section */}
+      {/* Enhanced main information section - more prominent */}
       <div className="location-main-info">
         <div className="main-info-card">
-          <h2>Key Information</h2>
-          <div className="info-grid">
-            <div className="info-item">
-              <span className="info-icon">📍</span>
-              <div>
-                <strong>Location</strong>
-                <p>{location.location}</p>
+          <div className="main-info-header">
+            <h2>📚 Study Spot Details</h2>
+            <p className="main-info-subtitle">Everything you need to know about this location</p>
+          </div>
+          
+          <div className="info-grid-enhanced">
+            <div className="info-item-enhanced">
+              <div className="info-icon-large">📍</div>
+              <div className="info-content">
+                <h3>Location</h3>
+                <p className="info-value">{location.location}</p>
               </div>
             </div>
-            <div className="info-item">
-              <span className="info-icon">⏰</span>
-              <div>
-                <strong>Hours</strong>
-                <p>Open 24/7</p>
+            
+            <div className="info-item-enhanced">
+              <div className="info-icon-large">⏰</div>
+              <div className="info-content">
+                <h3>Hours</h3>
+                <p className="info-value">Open 24/7</p>
               </div>
             </div>
-            <div className="info-item">
-              <span className="info-icon">👥</span>
-              <div>
-                <strong>Capacity</strong>
-                <p>{location.capacity} people</p>
+            
+            <div className="info-item-enhanced">
+              <div className="info-icon-large">👥</div>
+              <div className="info-content">
+                <h3>Capacity</h3>
+                <p className="info-value">{location.capacity} people</p>
               </div>
             </div>
-            <div className="info-item">
-              <span className="info-icon">🔇</span>
-              <div>
-                <strong>Noise Level</strong>
-                <p>{location.noise_level}</p>
+            
+            <div className="info-item-enhanced">
+              <div className="info-icon-large">🔇</div>
+              <div className="info-content">
+                <h3>Noise Level</h3>
+                <p className="info-value">{location.noise_level}</p>
               </div>
             </div>
-            <div className="info-item">
-              <span className="info-icon">💻</span>
-              <div>
-                <strong>WiFi</strong>
-                <p>{location.wifi_available ? 'Available' : 'Not Available'}</p>
+            
+            <div className="info-item-enhanced">
+              <div className="info-icon-large">💻</div>
+              <div className="info-content">
+                <h3>WiFi</h3>
+                <p className="info-value">{location.wifi_available ? '✅ Available' : '❌ Not Available'}</p>
               </div>
             </div>
-            <div className="info-item">
-              <span className="info-icon">🔌</span>
-              <div>
-                <strong>Outlets</strong>
-                <p>{location.power_outlets ? 'Available' : 'Not Available'}</p>
+            
+            <div className="info-item-enhanced">
+              <div className="info-icon-large">🔌</div>
+              <div className="info-content">
+                <h3>Outlets</h3>
+                <p className="info-value">{location.power_outlets ? '✅ Available' : '❌ Not Available'}</p>
               </div>
             </div>
           </div>
+          
           {location.amenities && (
-            <div className="amenities-section">
-              <strong>Amenities:</strong>
-              <p>{location.amenities}</p>
+            <div className="amenities-section-enhanced">
+              <h3>🎯 Additional Amenities</h3>
+              <p className="amenities-text">{location.amenities}</p>
+            </div>
+          )}
+          
+          {location.description && (
+            <div className="description-section-enhanced">
+              <h3>📝 About This Location</h3>
+              <p className="description-text">{location.description}</p>
             </div>
           )}
         </div>

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
+import MapView from '../components/MapView'
 
 const Results = () => {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const [sortBy, setSortBy] = useState('rating')
-  const [viewMode, setViewMode] = useState('list')
+  const [viewMode, setViewMode] = useState('list') // Default to list view as requested
   const [filters, setFilters] = useState({
     noiseLevel: '',
     wifi: false,
@@ -90,6 +92,10 @@ const Results = () => {
     )
   }
 
+  const handleSpotClick = (spot) => {
+    navigate(`/location/${spot.id}`)
+  }
+
   return (
     <div className="results-page">
       <h1>Search Results</h1>
@@ -104,6 +110,22 @@ const Results = () => {
         />
         <button className="btn btn-primary">Search</button>
         <button className="btn btn-secondary">Browse Nearby</button>
+      </div>
+
+      {/* View Toggle */}
+      <div className="view-toggle">
+        <button 
+          className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+          onClick={() => setViewMode('list')}
+        >
+          📋 List View
+        </button>
+        <button 
+          className={`view-toggle-btn ${viewMode === 'map' ? 'active' : ''}`}
+          onClick={() => setViewMode('map')}
+        >
+          🗺️ Map View
+        </button>
       </div>
 
       <div className="results-layout">
@@ -222,7 +244,7 @@ const Results = () => {
           </div>
         </div>
 
-        {/* Results List */}
+        {/* Results Content */}
         <div className="results-content">
           <p>Found {studySpots.length} study spots</p>
           
@@ -248,26 +270,21 @@ const Results = () => {
                     <span className="seating">Capacity: {spot.capacity}</span>
                   </div>
                   
-                  <div className="result-address">
-                    📍 {spot.location}
+                  <div className="result-actions">
+                    <Link to={`/location/${spot.id}`} className="btn btn-primary">
+                      View Details
+                    </Link>
                   </div>
-                  
-                  {spot.amenities && (
-                    <div className="result-amenities">
-                      <small>{spot.amenities}</small>
-                    </div>
-                  )}
-                  
-                  <Link to={`/location/${spot.id}`} className="btn btn-outline">
-                    View Details
-                  </Link>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="map-view">
-              <p>Map view would be displayed here</p>
-              <p>Showing {studySpots.length} locations on map</p>
+            <div className="map-view-container">
+              <MapView 
+                studySpots={studySpots} 
+                onSpotClick={handleSpotClick}
+                userLocation={null}
+              />
             </div>
           )}
         </div>
