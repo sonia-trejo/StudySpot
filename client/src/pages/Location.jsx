@@ -122,7 +122,7 @@ const Location = () => {
               <div className="info-icon-large">👥</div>
               <div className="info-content">
                 <h3>Capacity</h3>
-                <p className="info-value">{location.capacity || 'N/A'} people</p>
+                <p className="info-value">{location.capacity || 'N/A'}</p>
               </div>
             </div>
             
@@ -161,7 +161,7 @@ const Location = () => {
           {location.description && (
             <div className="description-section-enhanced">
               <h3>📝 About This Location</h3>
-              <p className="description-text">{location.description}</p>
+              <p className="description-text">{location.description || 'No description available'}</p>
             </div>
           )}
         </div>
@@ -171,7 +171,7 @@ const Location = () => {
         <div className="location-info">
           <div className="info-section">
             <h3>Description</h3>
-            <p>{location.description}</p>
+            <p>{location.description || 'No description available'}</p>
           </div>
         </div>
 
