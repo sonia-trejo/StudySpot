@@ -137,24 +137,7 @@ const Results = () => {
             </select>
           </div>
 
-          <div className="filter-group">
-            <label>View:</label>
-            <div className="view-toggle">
-              <button 
-                className={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setViewMode('list')}
-              >
-                List
-              </button>
-              <button 
-                className={`btn ${viewMode === 'map' ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setViewMode('map')}
-              >
-                Map
-              </button>
-            </div>
-          </div>
-
+          
           <div className="filter-group">
             <label>Noise Level:</label>
             <select value={filters.noiseLevel} onChange={(e) => handleFilterChange('noiseLevel', e.target.value)}>

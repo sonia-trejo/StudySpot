@@ -172,19 +172,37 @@ class ApiService {
           const searchParams = Object.fromEntries(params.entries());
           return await this.getRealStudySpots(searchParams);
         } catch (supabaseError) {
-          console.log('Supabase failed, using mock data');
-          return { study_spots: mockStudySpots };
+          console.error('Supabase connection failed:', supabaseError);
+          throw new Error('Unable to connect to database. Please check your connection and try again.');
         }
       }
       
-      // Return mock data for specific study spot
+      // For specific study spot, use direct Supabase
       if (endpoint.includes('/study-spots/') && endpoint.split('/').pop()) {
-        const id = parseInt(endpoint.split('/').pop());
-        const spot = mockStudySpots.find(s => s.id === id);
-        if (spot) return spot;
+        try {
+          const id = parseInt(endpoint.split('/').pop());
+          const { createClient } = await import('@supabase/supabase-js');
+          
+          const supabase = createClient(
+            'https://qeqpwqdnwbjsgldiorte.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjM4NDYsImV4cCI6MjA5MzEzOTg0Nn0.Ea3GLnoqhoAmzMUF2DK2iDLoqPYr_0_LHeuyUIslzmo'
+          );
+          
+          const { data, error } = await supabase
+            .from('study_spots')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (error) throw error;
+          return data;
+        } catch (supabaseError) {
+          console.error('Supabase connection failed:', supabaseError);
+          throw new Error('Unable to fetch study spot details. Please try again.');
+        }
       }
       
-      // Return mock health check
+      // Return health check
       if (endpoint.includes('/health')) {
         return { 
           status: 'healthy', 
@@ -231,10 +249,40 @@ class ApiService {
 
   // POST /api/reviews
   async createReview(reviewData) {
-    return this.request('/reviews', {
-      method: 'POST',
-      body: JSON.stringify(reviewData),
-    });
+    try {
+      // Get current user from Supabase auth
+      const { createClient } = await import('@supabase/supabase-js');
+      
+      const supabase = createClient(
+        'https://qeqpwqdnwbjsgldiorte.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjM4NDYsImV4cCI6MjA5MzEzOTg0Nn0.Ea3GLnoqhoAmzMUF2DK2iDLoqPYr_0_LHeuyUIslzmo'
+      );
+      
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User not authenticated. Please log in to submit a review.');
+      }
+      
+      // Add user_id to review data for RLS compliance
+      const reviewWithUserId = {
+        ...reviewData,
+        user_id: user.id
+      };
+      
+      // Insert directly into Supabase to ensure user_id is set correctly
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert([reviewWithUserId])
+        .select();
+      
+      if (error) throw error;
+      
+      return data[0];
+    } catch (error) {
+      console.error('Error creating review:', error);
+      throw error;
+    }
   }
 }
 
