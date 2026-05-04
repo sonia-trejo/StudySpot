@@ -86,28 +86,75 @@ const Location = () => {
         </div>
       </div>
 
+      {/* Move Write Review button to top */}
+      <div className="location-actions-top">
+        <Link to={`/review?location_id=${location.id}`} className="btn btn-primary btn-large">
+          Write a Review
+        </Link>
+      </div>
+
+      {/* Enhanced main information section */}
+      <div className="location-main-info">
+        <div className="main-info-card">
+          <h2>Key Information</h2>
+          <div className="info-grid">
+            <div className="info-item">
+              <span className="info-icon">📍</span>
+              <div>
+                <strong>Location</strong>
+                <p>{location.location}</p>
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">⏰</span>
+              <div>
+                <strong>Hours</strong>
+                <p>Open 24/7</p>
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">👥</span>
+              <div>
+                <strong>Capacity</strong>
+                <p>{location.capacity} people</p>
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">🔇</span>
+              <div>
+                <strong>Noise Level</strong>
+                <p>{location.noise_level}</p>
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">💻</span>
+              <div>
+                <strong>WiFi</strong>
+                <p>{location.wifi_available ? 'Available' : 'Not Available'}</p>
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">🔌</span>
+              <div>
+                <strong>Outlets</strong>
+                <p>{location.power_outlets ? 'Available' : 'Not Available'}</p>
+              </div>
+            </div>
+          </div>
+          {location.amenities && (
+            <div className="amenities-section">
+              <strong>Amenities:</strong>
+              <p>{location.amenities}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="location-details">
         <div className="location-info">
           <div className="info-section">
-            <h3>Location</h3>
-            <p>📍 {location.location}</p>
-          </div>
-
-          <div className="info-section">
-            <h3>Details</h3>
-            <p><strong>Description:</strong> {location.description}</p>
-            <p><strong>Capacity:</strong> {location.capacity} people</p>
-            <p><strong>Noise Level:</strong> {location.noise_level}</p>
-          </div>
-
-          <div className="info-section">
-            <h3>Features</h3>
-            <div className="tags">
-              {location.wifi_available && <span className="tag">wifi</span>}
-              {location.power_outlets && <span className="tag">outlets</span>}
-              <span className="tag">{location.noise_level}</span>
-            </div>
-            {location.amenities && <p><strong>Amenities:</strong> {location.amenities}</p>}
+            <h3>Description</h3>
+            <p>{location.description}</p>
           </div>
         </div>
 
@@ -182,10 +229,7 @@ const Location = () => {
         </div>
       </div>
 
-      <div className="location-actions">
-        <Link to="/review" className="btn btn-primary">
-          Write a Review
-        </Link>
+      <div className="location-actions-bottom">
         <Link to="/results" className="btn btn-secondary">
           Back to Results
         </Link>

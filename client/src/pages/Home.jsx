@@ -13,27 +13,32 @@ const Home = () => {
   return (
     <div className="home-page">
       <h1>StudySpot</h1>
-      <p>Find the perfect study spot near you</p>
+      <p>Discover the perfect study spot near you</p>
       
-      <form onSubmit={handleSearch} className="search-form">
-        <div className="search-input-group">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for study spots..."
-            className="search-input"
-          />
-          <button type="submit" className="btn btn-primary search-btn">
-            Search
-          </button>
-        </div>
-      </form>
-
+      {/* Primary action - Browse available locations */}
       <div className="home-actions">
-        <Link to="/results" className="btn btn-secondary">
-          Browse All Spots
+        <Link to="/results" className="btn btn-primary btn-large">
+          Browse Study Spots
         </Link>
+      </div>
+
+      {/* Secondary action - Search (less prominent) */}
+      <div className="secondary-search">
+        <p>or search for a specific location:</p>
+        <form onSubmit={handleSearch} className="search-form">
+          <div className="search-input-group">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for study spots..."
+              className="search-input"
+            />
+            <button type="submit" className="btn btn-secondary search-btn">
+              Search
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

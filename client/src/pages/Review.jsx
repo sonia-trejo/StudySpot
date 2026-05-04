@@ -19,6 +19,8 @@ const Review = () => {
   const [errors, setErrors] = useState({})
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false)
+  const [authData, setAuthData] = useState({ email: '', password: '' })
 
   const validateForm = () => {
     const newErrors = {}
@@ -80,35 +82,54 @@ const Review = () => {
     }
   }
 
+  const handleButtonSelect = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field] === value ? '' : value
+    }))
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }))
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (validateForm()) {
-      try {
-        setIsSubmitting(true)
-        
-        // Map form data to API format
-        const reviewData = {
-          location_id: parseInt(formData.location_id),
-          rating: formData.rating,
-          noise_level: formData.noiseLevel,
-          wifi_quality: formData.wifiQuality,
-          outlets: formData.outlets,
-          crowding: formData.crowding,
-          time_visited: formData.timeVisited,
-          visit_type: formData.visitType,
-          comment: formData.comment || undefined
-        }
-        
-        await apiService.createReview(reviewData)
-        setIsSubmitted(true)
-        console.log('Review submitted successfully:', reviewData)
-      } catch (error) {
-        console.error('Error submitting review:', error)
-        setErrors({ submit: 'Failed to submit review. Please try again.' })
-      } finally {
-        setIsSubmitting(false)
+      // Show authentication prompt before submitting
+      setShowAuthPrompt(true)
+    }
+  }
+
+  const handleAuthSubmit = async () => {
+    try {
+      setIsSubmitting(true)
+      
+      // Map form data to API format
+      const reviewData = {
+        location_id: parseInt(formData.location_id),
+        rating: formData.rating,
+        noise_level: formData.noiseLevel,
+        wifi_quality: formData.wifiQuality,
+        outlets: formData.outlets,
+        crowding: formData.crowding,
+        time_visited: formData.timeVisited,
+        visit_type: formData.visitType,
+        comment: formData.comment || undefined
       }
+      
+      await apiService.createReview(reviewData)
+      setIsSubmitted(true)
+      console.log('Review submitted successfully:', reviewData)
+    } catch (error) {
+      console.error('Error submitting review:', error)
+      setErrors({ submit: 'Failed to submit review. Please try again.' })
+    } finally {
+      setIsSubmitting(false)
+      setShowAuthPrompt(false)
     }
   }
 
@@ -174,95 +195,123 @@ const Review = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="noiseLevel">Noise Level *</label>
-          <select
-            id="noiseLevel"
-            name="noiseLevel"
-            value={formData.noiseLevel}
-            onChange={handleChange}
-            className={errors.noiseLevel ? 'error' : ''}
-          >
-            <option value="">Select noise level</option>
-            <option value="very-quiet">Very Quiet</option>
-            <option value="quiet">Quiet</option>
-            <option value="moderate">Moderate</option>
-            <option value="loud">Loud</option>
-            <option value="very-loud">Very Loud</option>
-          </select>
+          <label>Noise Level *</label>
+          <div className="button-group">
+            {[
+              { value: 'very-quiet', label: 'Very Quiet', icon: '🤫' },
+              { value: 'quiet', label: 'Quiet', icon: '🔇' },
+              { value: 'moderate', label: 'Moderate', icon: '🔉' },
+              { value: 'loud', label: 'Loud', icon: '🔊' },
+              { value: 'very-loud', label: 'Very Loud', icon: '📢' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`btn-option ${formData.noiseLevel === option.value ? 'selected' : ''}`}
+                onClick={() => handleButtonSelect('noiseLevel', option.value)}
+              >
+                <span className="option-icon">{option.icon}</span>
+                <span className="option-label">{option.label}</span>
+              </button>
+            ))}
+          </div>
           {errors.noiseLevel && <span className="error-message">{errors.noiseLevel}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="wifiQuality">WiFi Quality *</label>
-          <select
-            id="wifiQuality"
-            name="wifiQuality"
-            value={formData.wifiQuality}
-            onChange={handleChange}
-            className={errors.wifiQuality ? 'error' : ''}
-          >
-            <option value="">Select WiFi quality</option>
-            <option value="excellent">Excellent</option>
-            <option value="good">Good</option>
-            <option value="fair">Fair</option>
-            <option value="poor">Poor</option>
-            <option value="none">No WiFi</option>
-          </select>
+          <label>WiFi Quality *</label>
+          <div className="button-group">
+            {[
+              { value: 'excellent', label: 'Excellent', icon: '🚀' },
+              { value: 'good', label: 'Good', icon: '👍' },
+              { value: 'fair', label: 'Fair', icon: '👌' },
+              { value: 'poor', label: 'Poor', icon: '👎' },
+              { value: 'none', label: 'No WiFi', icon: '❌' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`btn-option ${formData.wifiQuality === option.value ? 'selected' : ''}`}
+                onClick={() => handleButtonSelect('wifiQuality', option.value)}
+              >
+                <span className="option-icon">{option.icon}</span>
+                <span className="option-label">{option.label}</span>
+              </button>
+            ))}
+          </div>
           {errors.wifiQuality && <span className="error-message">{errors.wifiQuality}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="outlets">Outlet Availability *</label>
-          <select
-            id="outlets"
-            name="outlets"
-            value={formData.outlets}
-            onChange={handleChange}
-            className={errors.outlets ? 'error' : ''}
-          >
-            <option value="">Select outlet availability</option>
-            <option value="plenty">Plenty of outlets</option>
-            <option value="some">Some outlets</option>
-            <option value="few">Few outlets</option>
-            <option value="none">No outlets</option>
-          </select>
+          <label>Outlet Availability *</label>
+          <div className="button-group">
+            {[
+              { value: 'plenty', label: 'Plenty', icon: '🔌🔌🔌' },
+              { value: 'some', label: 'Some', icon: '🔌🔌' },
+              { value: 'few', label: 'Few', icon: '🔌' },
+              { value: 'none', label: 'None', icon: '❌' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`btn-option ${formData.outlets === option.value ? 'selected' : ''}`}
+                onClick={() => handleButtonSelect('outlets', option.value)}
+              >
+                <span className="option-icon">{option.icon}</span>
+                <span className="option-label">{option.label}</span>
+              </button>
+            ))}
+          </div>
           {errors.outlets && <span className="error-message">{errors.outlets}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="crowding">Crowding Level *</label>
-          <select
-            id="crowding"
-            name="crowding"
-            value={formData.crowding}
-            onChange={handleChange}
-            className={errors.crowding ? 'error' : ''}
-          >
-            <option value="">Select crowding level</option>
-            <option value="empty">Empty</option>
-            <option value="low">Low</option>
-            <option value="moderate">Moderate</option>
-            <option value="busy">Busy</option>
-            <option value="very-busy">Very Busy</option>
-          </select>
+          <label>Crowding Level *</label>
+          <div className="button-group">
+            {[
+              { value: 'empty', label: 'Empty', icon: '🏜️' },
+              { value: 'low', label: 'Low', icon: '👤' },
+              { value: 'moderate', label: 'Moderate', icon: '👥' },
+              { value: 'busy', label: 'Busy', icon: '👥👥' },
+              { value: 'very-busy', label: 'Very Busy', icon: '👥👥👥' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`btn-option ${formData.crowding === option.value ? 'selected' : ''}`}
+                onClick={() => handleButtonSelect('crowding', option.value)}
+              >
+                <span className="option-icon">{option.icon}</span>
+                <span className="option-label">{option.label}</span>
+              </button>
+            ))}
+          </div>
           {errors.crowding && <span className="error-message">{errors.crowding}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="timeVisited">Time Visited *</label>
-          <select
-            id="timeVisited"
-            name="timeVisited"
-            value={formData.timeVisited}
-            onChange={handleChange}
-            className={errors.timeVisited ? 'error' : ''}
-          >
-            <option value="">Select time</option>
-            <option value="morning">Morning (6AM-12PM)</option>
-            <option value="afternoon">Afternoon (12PM-6PM)</option>
-            <option value="evening">Evening (6PM-12AM)</option>
-            <option value="night">Night (12AM-6AM)</option>
-          </select>
+          <label>Time Visited *</label>
+          <div className="button-group">
+            {[
+              { value: 'morning', label: 'Morning', icon: '🌅', sublabel: '6AM-12PM' },
+              { value: 'afternoon', label: 'Afternoon', icon: '☀️', sublabel: '12PM-6PM' },
+              { value: 'evening', label: 'Evening', icon: '🌆', sublabel: '6PM-12AM' },
+              { value: 'night', label: 'Night', icon: '🌙', sublabel: '12AM-6AM' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`btn-option ${formData.timeVisited === option.value ? 'selected' : ''}`}
+                onClick={() => handleButtonSelect('timeVisited', option.value)}
+              >
+                <span className="option-icon">{option.icon}</span>
+                <div className="option-text">
+                  <span className="option-label">{option.label}</span>
+                  <span className="option-sublabel">{option.sublabel}</span>
+                </div>
+              </button>
+            ))}
+          </div>
           {errors.timeVisited && <span className="error-message">{errors.timeVisited}</span>}
         </div>
 
@@ -326,6 +375,72 @@ const Review = () => {
         
         {errors.submit && <span className="error-message">{errors.submit}</span>}
       </form>
+
+      {/* Authentication Prompt Modal */}
+      {showAuthPrompt && (
+        <div className="auth-modal-overlay">
+          <div className="auth-modal">
+            <div className="auth-modal-header">
+              <h2>Sign In to Submit Review</h2>
+              <button 
+                type="button" 
+                className="close-btn" 
+                onClick={() => setShowAuthPrompt(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="auth-modal-body">
+              <p>Please sign in to submit your review. Your feedback helps other students find great study spots!</p>
+              
+              <div className="auth-form">
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={authData.email}
+                    onChange={(e) => setAuthData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="your.email@example.com"
+                    className="auth-input"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="password">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={authData.password}
+                    onChange={(e) => setAuthData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Enter your password"
+                    className="auth-input"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="auth-modal-footer">
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={() => setShowAuthPrompt(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-primary" 
+                onClick={handleAuthSubmit}
+                disabled={!authData.email || !authData.password || isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Sign In & Submit Review'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
