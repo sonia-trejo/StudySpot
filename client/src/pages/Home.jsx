@@ -61,11 +61,8 @@ const Home = () => {
 
     try {
       setLocationSearching(true)
-      // For now, we'll simulate location search by filtering all spots
-      // In a real app, you'd use a geocoding API to convert city/zip to coordinates
-      const allSpots = studySpots
-      setNearbySpots(allSpots.slice(0, 3)) // Show first 3 spots as "nearby"
-      setShowNearby(true)
+      // Navigate to results page with search query
+      navigate(`/results?search=${encodeURIComponent(locationInput)}`)
     } catch (err) {
       console.error('Error searching by location:', err)
       alert('Unable to search for that location. Please try again.')

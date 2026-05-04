@@ -1,28 +1,12 @@
 import { useState, useEffect } from 'react'
 
 const MapView = ({ studySpots, onSpotClick, userLocation }) => {
-  const [mapLoaded, setMapLoaded] = useState(false)
+  const [mapLoaded, setMapLoaded] = useState(true) // Set to true immediately
 
   useEffect(() => {
-    // Simple map implementation using OpenStreetMap
-    const loadMap = () => {
-      setMapLoaded(true)
-    }
-    
-    // Simulate map loading
-    setTimeout(loadMap, 1000)
+    // Map loads immediately now
+    setMapLoaded(true)
   }, [])
-
-  if (!mapLoaded) {
-    return (
-      <div className="map-container">
-        <div className="map-loading">
-          <div className="loading-spinner"></div>
-          <p>Loading map...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="map-container">

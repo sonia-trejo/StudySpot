@@ -107,9 +107,21 @@ const Results = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by name..."
           className="search-input"
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              fetchStudySpots()
+            }
+          }}
         />
-        <button className="btn btn-primary">Search</button>
-        <button className="btn btn-secondary">Browse Nearby</button>
+        <button className="btn btn-primary" onClick={fetchStudySpots}>
+          Search
+        </button>
+        <button className="btn btn-secondary" onClick={() => {
+          setSearchQuery('')
+          fetchStudySpots()
+        }}>
+          Clear
+        </button>
       </div>
 
       {/* View Toggle */}
