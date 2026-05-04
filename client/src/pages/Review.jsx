@@ -46,7 +46,7 @@ const Review = () => {
     }
     
     if (!formData.crowding) {
-      newErrors.crowding = 'Crowding level is required'
+      newErrors.crowding = 'Crowd level is required'
     }
     
     if (!formData.timeVisited) {
@@ -196,22 +196,22 @@ const Review = () => {
 
         <div className="form-group">
           <label>Noise Level *</label>
-          <div className="button-group">
+          <div className="radio-group">
             {[
-              { value: 'very-quiet', label: 'Very Quiet' },
               { value: 'quiet', label: 'Quiet' },
               { value: 'moderate', label: 'Moderate' },
-              { value: 'loud', label: 'Loud' },
-              { value: 'very-loud', label: 'Very Loud' }
+              { value: 'loud', label: 'Loud' }
             ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`btn-option ${formData.noiseLevel === option.value ? 'selected' : ''}`}
-                onClick={() => handleButtonSelect('noiseLevel', option.value)}
-              >
-                <span className="option-label">{option.label}</span>
-              </button>
+              <label key={option.value}>
+                <input
+                  type="radio"
+                  name="noiseLevel"
+                  value={option.value}
+                  checked={formData.noiseLevel === option.value}
+                  onChange={handleChange}
+                />
+                {option.label}
+              </label>
             ))}
           </div>
           {errors.noiseLevel && <span className="error-message">{errors.noiseLevel}</span>}
@@ -219,22 +219,23 @@ const Review = () => {
 
         <div className="form-group">
           <label>WiFi Quality *</label>
-          <div className="button-group">
+          <div className="radio-group">
             {[
-              { value: 'excellent', label: 'Excellent' },
-              { value: 'good', label: 'Good' },
-              { value: 'fair', label: 'Fair' },
               { value: 'poor', label: 'Poor' },
-              { value: 'none', label: 'No WiFi' }
+              { value: 'okay', label: 'Okay' },
+              { value: 'fast', label: 'Fast' },
+              { value: 'very-fast', label: 'Very Fast' }
             ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`btn-option ${formData.wifiQuality === option.value ? 'selected' : ''}`}
-                onClick={() => handleButtonSelect('wifiQuality', option.value)}
-              >
-                <span className="option-label">{option.label}</span>
-              </button>
+              <label key={option.value}>
+                <input
+                  type="radio"
+                  name="wifiQuality"
+                  value={option.value}
+                  checked={formData.wifiQuality === option.value}
+                  onChange={handleChange}
+                />
+                {option.label}
+              </label>
             ))}
           </div>
           {errors.wifiQuality && <span className="error-message">{errors.wifiQuality}</span>}
@@ -242,44 +243,46 @@ const Review = () => {
 
         <div className="form-group">
           <label>Outlet Availability *</label>
-          <div className="button-group">
+          <div className="radio-group">
             {[
-              { value: 'plenty', label: 'Plenty' },
-              { value: 'some', label: 'Some' },
-              { value: 'few', label: 'Few' },
-              { value: 'none', label: 'None' }
+              { value: 'none', label: 'None' },
+              { value: 'limited', label: 'Limited' },
+              { value: 'plenty', label: 'Plenty' }
             ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`btn-option ${formData.outlets === option.value ? 'selected' : ''}`}
-                onClick={() => handleButtonSelect('outlets', option.value)}
-              >
-                <span className="option-label">{option.label}</span>
-              </button>
+              <label key={option.value}>
+                <input
+                  type="radio"
+                  name="outlets"
+                  value={option.value}
+                  checked={formData.outlets === option.value}
+                  onChange={handleChange}
+                />
+                {option.label}
+              </label>
             ))}
           </div>
           {errors.outlets && <span className="error-message">{errors.outlets}</span>}
         </div>
 
         <div className="form-group">
-          <label>Crowding Level *</label>
-          <div className="button-group">
+          <label>Crowd Level *</label>
+          <div className="radio-group">
             {[
               { value: 'empty', label: 'Empty' },
-              { value: 'low', label: 'Low' },
-              { value: 'moderate', label: 'Moderate' },
+              { value: 'chill', label: 'Chill' },
               { value: 'busy', label: 'Busy' },
-              { value: 'very-busy', label: 'Very Busy' }
+              { value: 'packed', label: 'Packed' }
             ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`btn-option ${formData.crowding === option.value ? 'selected' : ''}`}
-                onClick={() => handleButtonSelect('crowding', option.value)}
-              >
-                <span className="option-label">{option.label}</span>
-              </button>
+              <label key={option.value}>
+                <input
+                  type="radio"
+                  name="crowding"
+                  value={option.value}
+                  checked={formData.crowding === option.value}
+                  onChange={handleChange}
+                />
+                {option.label}
+              </label>
             ))}
           </div>
           {errors.crowding && <span className="error-message">{errors.crowding}</span>}
@@ -287,24 +290,23 @@ const Review = () => {
 
         <div className="form-group">
           <label>Time Visited *</label>
-          <div className="button-group">
+          <div className="radio-group">
             {[
-              { value: 'morning', label: 'Morning', sublabel: '6AM-12PM' },
-              { value: 'afternoon', label: 'Afternoon', sublabel: '12PM-6PM' },
-              { value: 'evening', label: 'Evening', sublabel: '6PM-12AM' },
-              { value: 'night', label: 'Night', sublabel: '12AM-6AM' }
+              { value: 'morning', label: 'Morning' },
+              { value: 'afternoon', label: 'Afternoon' },
+              { value: 'evening', label: 'Evening' },
+              { value: 'night', label: 'Night' }
             ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`btn-option ${formData.timeVisited === option.value ? 'selected' : ''}`}
-                onClick={() => handleButtonSelect('timeVisited', option.value)}
-              >
-                <div className="option-text">
-                  <span className="option-label">{option.label}</span>
-                  <span className="option-sublabel">{option.sublabel}</span>
-                </div>
-              </button>
+              <label key={option.value}>
+                <input
+                  type="radio"
+                  name="timeVisited"
+                  value={option.value}
+                  checked={formData.timeVisited === option.value}
+                  onChange={handleChange}
+                />
+                {option.label}
+              </label>
             ))}
           </div>
           {errors.timeVisited && <span className="error-message">{errors.timeVisited}</span>}
