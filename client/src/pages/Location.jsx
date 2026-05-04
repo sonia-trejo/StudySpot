@@ -61,16 +61,7 @@ const Location = () => {
     )
   }
 
-  // Mock peak hour data
-  const peakHours = [
-    { hour: '8AM', occupancy: 20 },
-    { hour: '10AM', occupancy: 45 },
-    { hour: '12PM', occupancy: 80 },
-    { hour: '2PM', occupancy: 65 },
-    { hour: '4PM', occupancy: 50 },
-    { hour: '6PM', occupancy: 35 },
-    { hour: '8PM', occupancy: 25 }
-  ]
+  // Peak hour data would come from real analytics in production
 
   const totalReviews = location.review_count || 0
   const averageRating = location.average_rating || 0
@@ -227,23 +218,7 @@ const Location = () => {
             )}
           </div>
 
-          <div className="peak-hours">
-            <h3>Peak Hours</h3>
-            <div className="peak-chart">
-              {peakHours.map((hour, index) => (
-                <div key={index} className="hour-bar">
-                  <div className="hour-label">{hour.hour}</div>
-                  <div className="bar-container">
-                    <div 
-                      className="bar-fill" 
-                      style={{ height: `${hour.occupancy}%` }}
-                    ></div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="location-actions-bottom">

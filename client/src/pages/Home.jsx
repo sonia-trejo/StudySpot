@@ -81,71 +81,7 @@ const Home = () => {
     }
   }
 
-  // Recommended study spots when no real data is available
-  const getRecommendedSpots = () => {
-    return [
-      {
-        id: 'rec-1',
-        name: 'University Library',
-        location: 'Main Campus Building',
-        average_rating: 4.5,
-        review_count: 127,
-        wifi_available: true,
-        power_outlets: true,
-        noise_level: 'quiet'
-      },
-      {
-        id: 'rec-2',
-        name: 'Student Union Coffee Shop',
-        location: 'Campus Center',
-        average_rating: 3.8,
-        review_count: 89,
-        wifi_available: true,
-        power_outlets: true,
-        noise_level: 'moderate'
-      },
-      {
-        id: 'rec-3',
-        name: 'Engineering Computer Lab',
-        location: 'Tech Building',
-        average_rating: 4.2,
-        review_count: 156,
-        wifi_available: true,
-        power_outlets: true,
-        noise_level: 'quiet'
-      },
-      {
-        id: 'rec-4',
-        name: 'Campus Green Space',
-        location: 'Outdoor Area',
-        average_rating: 3.5,
-        review_count: 64,
-        wifi_available: false,
-        power_outlets: false,
-        noise_level: 'moderate'
-      },
-      {
-        id: 'rec-5',
-        name: 'Medical Study Lounge',
-        location: 'Health Sciences Building',
-        average_rating: 4.7,
-        review_count: 203,
-        wifi_available: true,
-        power_outlets: true,
-        noise_level: 'quiet'
-      },
-      {
-        id: 'rec-6',
-        name: '24/7 Study Hall',
-        location: 'Student Services Building',
-        average_rating: 4.0,
-        review_count: 98,
-        wifi_available: true,
-        power_outlets: true,
-        noise_level: 'moderate'
-      }
-    ]
-  }
+  // No mock data - use real data only
 
   useEffect(() => {
     fetchStudySpots()
@@ -246,13 +182,13 @@ const Home = () => {
             ? `Found ${nearbySpots.length} study spots near your location`
             : studySpots.length > 0 
               ? 'Browse popular study locations in your area'
-              : 'No study spots found in your area. Here are some recommended options:'
+              : 'No study spots found. Try searching by city or zip code.'
           }
         </p>
         
         {viewMode === 'list' ? (
           <div className="study-spots-grid">
-            {(showNearby ? nearbySpots : studySpots.length > 0 ? studySpots.slice(0, 6) : getRecommendedSpots()).map((spot) => (
+            {(showNearby ? nearbySpots : studySpots.slice(0, 6)).map((spot) => (
               <Link key={spot.id} to={`/location/${spot.id}`} className="study-spot-card">
                 <div className="card-content">
                   <h3>{spot.name}</h3>
