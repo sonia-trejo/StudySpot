@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
-import MapView from '../components/MapView'
 
 const Results = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
-  const [sortBy, setSortBy] = useState('rating')
-  const [viewMode, setViewMode] = useState('list') // Default to list view as requested
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState('name') // Default sort by name
   const [filters, setFilters] = useState({
     noiseLevel: '',
     wifi: false,
@@ -28,24 +26,24 @@ const Results = () => {
       setLoading(true)
       setError(null)
       
-      // Build API parameters
-      const params = {
-        search: searchQuery || undefined,
-        noise_level: filters.noiseLevel || undefined,
-        wifi_available: filters.wifi ? true : undefined,
-        power_outlets: filters.outlets ? true : undefined,
-        sort_by: sortBy === 'closest' ? 'name' : sortBy === 'highest rated' ? 'rating' : sortBy,
-        order: sortBy === 'closest' ? 'asc' : 'desc'
-      }
-
-      // Remove undefined parameters
-      Object.keys(params).forEach(key => params[key] === undefined && delete params[key])
-
+      const params = {}
+      if (searchQuery) params.search = searchQuery
+      if (sortBy) params.sort_by = sortBy
+      
+      // Add filter parameters
+      if (filters.noiseLevel) params.noise_level = filters.noiseLevel
+      if (filters.wifi) params.wifi_available = true
+      if (filters.outlets) params.power_outlets = true
+      if (filters.seatingType) params.seating_type = filters.seatingType
+      if (filters.openNow) params.open_now = true
+      if (filters.purchaseRequired) params.purchase_required = true
+      if (filters.publicRestroom) params.public_restroom = true
+      
       const response = await apiService.getStudySpots(params)
       setStudySpots(response.study_spots || [])
     } catch (err) {
-      setError('Failed to load study spots. Please try again.')
       console.error('Error fetching study spots:', err)
+      setError('Failed to load study spots. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -105,7 +103,7 @@ const Results = () => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by name..."
+          placeholder="Search by study spot name..."
           className="search-input"
           onKeyPress={(e) => {
             if (e.key === 'Enter') {
@@ -121,22 +119,6 @@ const Results = () => {
           fetchStudySpots()
         }}>
           Clear
-        </button>
-      </div>
-
-      {/* View Toggle */}
-      <div className="view-toggle">
-        <button 
-          className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-          onClick={() => setViewMode('list')}
-        >
-          📋 List View
-        </button>
-        <button 
-          className={`view-toggle-btn ${viewMode === 'map' ? 'active' : ''}`}
-          onClick={() => setViewMode('map')}
-        >
-          🗺️ Map View
         </button>
       </div>
 
@@ -260,67 +242,52 @@ const Results = () => {
         <div className="results-content">
           <p>Found {studySpots.length} study spots</p>
           
-          {viewMode === 'list' ? (
-            <div className="results-list">
-              {studySpots.map(spot => (
-                <div key={spot.id} className="result-card">
-                  <div className="result-header">
-                    <h3>{spot.name}</h3>
-                    <div className="result-meta">
-                      <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'No rating'}</span>
-                      <span className="review-count">({spot.review_count || 0} reviews)</span>
-                    </div>
-                  </div>
-                  
-                  <div className="result-location">
-                    <p>📍 {spot.location}</p>
-                    {spot.distance && (
-                      <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
-                    )}
-                  </div>
-                  
-                  <div className="result-tags">
-                    {spot.wifi_available && <span className="tag">📶 WiFi</span>}
-                    {spot.power_outlets && <span className="tag">🔌 Outlets</span>}
-                    <span className="tag">🔇 Noise: {spot.noise_level}</span>
-                  </div>
-                  
-                  <div className="result-details">
-                    <div className="detail-item">
-                      <span className="detail-label">Capacity:</span>
-                      <span className="detail-value">{spot.capacity} people</span>
-                    </div>
-                    {spot.amenities && (
-                      <div className="detail-item">
-                        <span className="detail-label">Amenities:</span>
-                        <span className="detail-value">{spot.amenities}</span>
-                      </div>
-                    )}
-                    {spot.seating_type && (
-                      <div className="detail-item">
-                        <span className="detail-label">Seating:</span>
-                        <span className="detail-value">{spot.seating_type}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="result-actions">
-                    <Link to={`/location/${spot.id}`} className="btn btn-primary">
-                      View Details
-                    </Link>
+          <div className="results-list">
+            {studySpots.map(spot => (
+              <div key={spot.id} className="result-card">
+                <div className="result-header">
+                  <h3>{spot.name}</h3>
+                  <div className="result-meta">
+                    <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'No rating'}</span>
+                    <span className="review-count">({spot.review_count || 0} reviews)</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="map-view-container">
-              <MapView 
-                studySpots={studySpots} 
-                onSpotClick={handleSpotClick}
-                userLocation={null}
-              />
-            </div>
-          )}
+
+                <div className="result-location">
+                  <p>📍 {spot.location}</p>
+                  {spot.distance && (
+                    <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
+                  )}
+                </div>
+                
+                <div className="result-tags">
+                  {spot.wifi_available && <span className="tag">📶 WiFi</span>}
+                  {spot.power_outlets && <span className="tag">🔌 Outlets</span>}
+                  <span className="tag">🔇 Noise: {spot.noise_level}</span>
+                  {spot.seating_type && <span className="tag">🪑 Seating: {spot.seating_type}</span>}
+                </div>
+                
+                <div className="result-details">
+                  <div className="detail-item">
+                    <span className="detail-label">Capacity:</span>
+                    <span className="detail-value">{spot.capacity} people</span>
+                  </div>
+                  {spot.amenities && (
+                    <div className="detail-item">
+                      <span className="detail-label">Amenities:</span>
+                      <span className="detail-value">{spot.amenities}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="result-actions">
+                  <Link to={`/location/${spot.id}`} className="btn btn-primary">
+                    View Details
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -61,8 +61,16 @@ const Home = () => {
 
     try {
       setLocationSearching(true)
-      // Navigate to results page with search query
-      navigate(`/results?search=${encodeURIComponent(locationInput)}`)
+      
+      // Search for study spots by location
+      const response = await apiService.getStudySpots({ search: locationInput })
+      setNearbySpots(response.study_spots || [])
+      setShowNearby(true)
+      setViewMode('map') // Show map view for location search results
+      
+      // Clear location input
+      setLocationInput('')
+      
     } catch (err) {
       console.error('Error searching by location:', err)
       alert('Unable to search for that location. Please try again.')
