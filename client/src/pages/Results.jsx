@@ -282,7 +282,7 @@ const Results = () => {
                   <div className="result-tags">
                     {spot.wifi_available && <span className="tag">📶 WiFi</span>}
                     {spot.power_outlets && <span className="tag">🔌 Outlets</span>}
-                    <span className="tag">🔇 {spot.noise_level}</span>
+                    <span className="tag">🔇 Noise: {spot.noise_level}</span>
                   </div>
                   
                   <div className="result-details">

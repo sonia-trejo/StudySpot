@@ -185,7 +185,7 @@ const Home = () => {
                   <div className="features">
                     {spot.wifi_available && <span className="feature">WiFi</span>}
                     {spot.power_outlets && <span className="feature">Outlets</span>}
-                    <span className="feature">{spot.noise_level}</span>
+                    <span className="feature">Noise: {spot.noise_level}</span>
                   </div>
                 </div>
               </Link>
