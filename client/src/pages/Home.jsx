@@ -166,7 +166,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <h1>StudySpot</h1>
+      <h1>StudySpot - Updated: {new Date().toLocaleDateString()}</h1>
       <p>Find the perfect study spot near you</p>
       
       {/* Location Search */}
