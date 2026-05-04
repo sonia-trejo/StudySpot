@@ -92,12 +92,12 @@ const Home = () => {
       const response = await apiService.getStudySpots()
       const allSpots = response.study_spots || []
       
-      // Find spots within 25km of the searched location
+      // Find spots within 25km of the searched location with enhanced distance calculation
       const nearby = allSpots
         .map(spot => {
           if (!spot.latitude || !spot.longitude) return null;
           
-          // Calculate distance
+          // Calculate distance using Haversine formula
           const R = 6371; // Earth's radius in km
           const dLat = (spot.latitude - coordinates.latitude) * Math.PI / 180;
           const dLon = (spot.longitude - coordinates.longitude) * Math.PI / 180;
@@ -110,7 +110,8 @@ const Home = () => {
           
           return {
             ...spot,
-            distance: distance
+            distance: distance,
+            distanceCategory: distance < 5 ? 'Very Close' : distance < 10 ? 'Close' : distance < 20 ? 'Moderate' : 'Far'
           };
         })
         .filter(spot => spot && spot.distance <= 25)
@@ -201,10 +202,17 @@ const Home = () => {
         </button>
         
         {(userLocation || showNearby) && (
-          <p className="location-info">
-            📍 {userLocation ? `Found ${nearbySpots.length} study spots near ${userLocation.city || userLocation.displayName || locationInput}` : `Showing ${nearbySpots.length} study spots`}
-            {userLocation && ` within 25km`}
-          </p>
+          <div className="location-info">
+            <p>
+              📍 {userLocation ? `Found ${nearbySpots.length} study spots near ${userLocation.city || userLocation.displayName || locationInput}` : `Showing ${nearbySpots.length} study spots`}
+              {userLocation && ` within 25km`}
+            </p>
+            {nearbySpots.length > 0 && userLocation && (
+              <p className="search-details">
+                Searched location: {userLocation.displayName || userLocation.city}
+              </p>
+            )}
+          </div>
         )}
       </div>
       
@@ -246,7 +254,12 @@ const Home = () => {
                   <h3>{spot.name}</h3>
                   <p className="location">📍 {spot.location}</p>
                   {showNearby && spot.distance && (
-                    <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
+                    <div className="distance-info">
+                      <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
+                      <span className={`distance-badge ${spot.distanceCategory?.toLowerCase().replace(' ', '-')}`}>
+                        {spot.distanceCategory}
+                      </span>
+                    </div>
                   )}
                   <div className="card-meta">
                     <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'N/A'}</span>

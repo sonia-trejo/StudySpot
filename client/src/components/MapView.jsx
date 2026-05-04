@@ -21,13 +21,17 @@ const MapView = ({ studySpots, onSpotClick, userLocation }) => {
 
     // If we have a user location, position spots relative to it
     if (userLocation && userLocation.latitude && userLocation.longitude) {
-      // Simple relative positioning based on distance and direction
-      const latDiff = (spot.latitude - userLocation.latitude) * 1000
-      const lonDiff = (spot.longitude - userLocation.longitude) * 1000
+      // Calculate relative position with better scaling
+      const latDiff = (spot.latitude - userLocation.latitude) * 2000 // Scale factor for better visibility
+      const lonDiff = (spot.longitude - userLocation.longitude) * 2000
+      
+      // Constrain to map bounds
+      const left = Math.max(5, Math.min(95, 50 + lonDiff))
+      const top = Math.max(5, Math.min(95, 50 - latDiff))
       
       return {
-        left: `${50 + lonDiff}%`,
-        top: `${50 - latDiff}%`
+        left: `${left}%`,
+        top: `${top}%`
       }
     }
 
