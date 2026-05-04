@@ -106,6 +106,41 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
+  // Direct Supabase connection for real data
+  async getRealStudySpots(params = {}) {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      
+      const supabase = createClient(
+        'https://qeqpwqdnwbjsgldiorte.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjM4NDYsImV4cCI6MjA5MzEzOTg0Nn0.Ea3GLnoqhoAmzMUF2DK2iDLoqPYr_0_LHeuyUIslzmo'
+      );
+      
+      let query = supabase
+        .from('study_spots')
+        .select('*');
+      
+      // Apply filters if provided
+      if (params.search) {
+        query = query.ilike('name', `%${params.search}%`);
+      }
+      
+      if (params.sort_by) {
+        const ascending = params.order === 'asc';
+        query = query.order(params.sort_by, { ascending });
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      return { study_spots: data || [] };
+    } catch (error) {
+      console.error('Supabase connection failed:', error);
+      throw error;
+    }
+  }
+
   // Helper method for making API requests
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
@@ -128,11 +163,18 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('API request failed:', error);
-      console.log('Falling back to mock data');
+      console.log('Trying direct Supabase connection...');
       
-      // Return mock data for study spots endpoint
+      // Try direct Supabase connection for study spots
       if (endpoint.includes('/study-spots')) {
-        return { study_spots: mockStudySpots };
+        try {
+          const params = new URLSearchParams(endpoint.split('?')[1] || '');
+          const searchParams = Object.fromEntries(params.entries());
+          return await this.getRealStudySpots(searchParams);
+        } catch (supabaseError) {
+          console.log('Supabase failed, using mock data');
+          return { study_spots: mockStudySpots };
+        }
       }
       
       // Return mock data for specific study spot
@@ -147,7 +189,7 @@ class ApiService {
         return { 
           status: 'healthy', 
           timestamp: new Date().toISOString(),
-          message: 'StudySpot API is running (mock version)'
+          message: 'StudySpot API is running (direct Supabase version)'
         };
       }
       
