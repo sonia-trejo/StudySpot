@@ -198,11 +198,11 @@ const Review = () => {
           <label>Noise Level *</label>
           <div className="button-group">
             {[
-              { value: 'very-quiet', label: 'Very Quiet', icon: '🤫' },
-              { value: 'quiet', label: 'Quiet', icon: '🔇' },
-              { value: 'moderate', label: 'Moderate', icon: '🔉' },
-              { value: 'loud', label: 'Loud', icon: '🔊' },
-              { value: 'very-loud', label: 'Very Loud', icon: '📢' }
+              { value: 'very-quiet', label: 'Very Quiet' },
+              { value: 'quiet', label: 'Quiet' },
+              { value: 'moderate', label: 'Moderate' },
+              { value: 'loud', label: 'Loud' },
+              { value: 'very-loud', label: 'Very Loud' }
             ].map((option) => (
               <button
                 key={option.value}
@@ -210,7 +210,6 @@ const Review = () => {
                 className={`btn-option ${formData.noiseLevel === option.value ? 'selected' : ''}`}
                 onClick={() => handleButtonSelect('noiseLevel', option.value)}
               >
-                <span className="option-icon">{option.icon}</span>
                 <span className="option-label">{option.label}</span>
               </button>
             ))}
@@ -222,11 +221,11 @@ const Review = () => {
           <label>WiFi Quality *</label>
           <div className="button-group">
             {[
-              { value: 'excellent', label: 'Excellent', icon: '🚀' },
-              { value: 'good', label: 'Good', icon: '👍' },
-              { value: 'fair', label: 'Fair', icon: '👌' },
-              { value: 'poor', label: 'Poor', icon: '👎' },
-              { value: 'none', label: 'No WiFi', icon: '❌' }
+              { value: 'excellent', label: 'Excellent' },
+              { value: 'good', label: 'Good' },
+              { value: 'fair', label: 'Fair' },
+              { value: 'poor', label: 'Poor' },
+              { value: 'none', label: 'No WiFi' }
             ].map((option) => (
               <button
                 key={option.value}
@@ -234,7 +233,6 @@ const Review = () => {
                 className={`btn-option ${formData.wifiQuality === option.value ? 'selected' : ''}`}
                 onClick={() => handleButtonSelect('wifiQuality', option.value)}
               >
-                <span className="option-icon">{option.icon}</span>
                 <span className="option-label">{option.label}</span>
               </button>
             ))}
@@ -246,10 +244,10 @@ const Review = () => {
           <label>Outlet Availability *</label>
           <div className="button-group">
             {[
-              { value: 'plenty', label: 'Plenty', icon: '🔌🔌🔌' },
-              { value: 'some', label: 'Some', icon: '🔌🔌' },
-              { value: 'few', label: 'Few', icon: '🔌' },
-              { value: 'none', label: 'None', icon: '❌' }
+              { value: 'plenty', label: 'Plenty' },
+              { value: 'some', label: 'Some' },
+              { value: 'few', label: 'Few' },
+              { value: 'none', label: 'None' }
             ].map((option) => (
               <button
                 key={option.value}
@@ -257,7 +255,6 @@ const Review = () => {
                 className={`btn-option ${formData.outlets === option.value ? 'selected' : ''}`}
                 onClick={() => handleButtonSelect('outlets', option.value)}
               >
-                <span className="option-icon">{option.icon}</span>
                 <span className="option-label">{option.label}</span>
               </button>
             ))}
@@ -269,11 +266,11 @@ const Review = () => {
           <label>Crowding Level *</label>
           <div className="button-group">
             {[
-              { value: 'empty', label: 'Empty', icon: '🏜️' },
-              { value: 'low', label: 'Low', icon: '👤' },
-              { value: 'moderate', label: 'Moderate', icon: '👥' },
-              { value: 'busy', label: 'Busy', icon: '👥👥' },
-              { value: 'very-busy', label: 'Very Busy', icon: '👥👥👥' }
+              { value: 'empty', label: 'Empty' },
+              { value: 'low', label: 'Low' },
+              { value: 'moderate', label: 'Moderate' },
+              { value: 'busy', label: 'Busy' },
+              { value: 'very-busy', label: 'Very Busy' }
             ].map((option) => (
               <button
                 key={option.value}
@@ -281,7 +278,6 @@ const Review = () => {
                 className={`btn-option ${formData.crowding === option.value ? 'selected' : ''}`}
                 onClick={() => handleButtonSelect('crowding', option.value)}
               >
-                <span className="option-icon">{option.icon}</span>
                 <span className="option-label">{option.label}</span>
               </button>
             ))}
@@ -293,10 +289,10 @@ const Review = () => {
           <label>Time Visited *</label>
           <div className="button-group">
             {[
-              { value: 'morning', label: 'Morning', icon: '🌅', sublabel: '6AM-12PM' },
-              { value: 'afternoon', label: 'Afternoon', icon: '☀️', sublabel: '12PM-6PM' },
-              { value: 'evening', label: 'Evening', icon: '🌆', sublabel: '6PM-12AM' },
-              { value: 'night', label: 'Night', icon: '🌙', sublabel: '12AM-6AM' }
+              { value: 'morning', label: 'Morning', sublabel: '6AM-12PM' },
+              { value: 'afternoon', label: 'Afternoon', sublabel: '12PM-6PM' },
+              { value: 'evening', label: 'Evening', sublabel: '6PM-12AM' },
+              { value: 'night', label: 'Night', sublabel: '12AM-6AM' }
             ].map((option) => (
               <button
                 key={option.value}
@@ -304,7 +300,6 @@ const Review = () => {
                 className={`btn-option ${formData.timeVisited === option.value ? 'selected' : ''}`}
                 onClick={() => handleButtonSelect('timeVisited', option.value)}
               >
-                <span className="option-icon">{option.icon}</span>
                 <div className="option-text">
                   <span className="option-label">{option.label}</span>
                   <span className="option-sublabel">{option.sublabel}</span>
