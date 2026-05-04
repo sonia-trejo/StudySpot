@@ -25,8 +25,9 @@ async function loadSecrets() {
     
     // Set environment variables from secrets
     process.env.SUPABASE_URL = secrets.SUPABASE_URL;
-    process.env.SUPABASE_ANON_KEY = secrets.SUPABASE_ANON_KEY;
     process.env.SUPABASE_SERVICE_ROLE_KEY = secrets.SUPABASE_SERVICE_ROLE_KEY;
+    // Use the service role key for both anon and service operations in Lambda
+    process.env.SUPABASE_ANON_KEY = secrets.SUPABASE_SERVICE_ROLE_KEY;
     
     secretsLoaded = true;
     console.log('Secrets loaded successfully from AWS Secrets Manager');

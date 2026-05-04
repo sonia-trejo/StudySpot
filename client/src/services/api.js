@@ -1,5 +1,5 @@
 // API service for StudySpot client
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://vdz04zruk5.execute-api.us-east-1.amazonaws.com/prod';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://5cr1fhtxv1.execute-api.us-east-1.amazonaws.com';
 
 class ApiService {
   constructor() {

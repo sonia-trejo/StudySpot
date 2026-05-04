@@ -10,7 +10,8 @@
                 "apigateway:*",
                 "logs:*",
                 "s3:*",
-                "secretsmanager:*"
+                "secretsmanager:*",
+                "tag:*"
             ],
             "Resource": "*"
         }

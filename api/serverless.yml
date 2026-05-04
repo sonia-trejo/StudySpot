@@ -13,8 +13,22 @@ provider:
   # Environment variables
   environment:
     NODE_ENV: production
-    SUPABASE_URL: https://qeqpwqdnwbjsgldiorte.supabase.co
-    SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzU2Mzg0NiwiZXhwIjoyMDkzMTM5ODQ2fQ.q3J8X7mYqXrLc8nHqQJ2xYmFvE5sK6Z9tW8rG1mP3o
+
+  # IAM permissions
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource: 
+            - arn:aws:secretsmanager:us-east-1:846719029083:secret:studyspot/api/prod-glwtOB
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
 
 functions:
   api:
