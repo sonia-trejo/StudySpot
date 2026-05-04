@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import { getCurrentLocation, filterNearbyLocations } from '../utils/geolocation'
 import MapView from '../components/MapView'
+import { testAPIConnection } from '../utils/api-test'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -148,6 +149,10 @@ const Home = () => {
 
   useEffect(() => {
     fetchStudySpots()
+    // Test API connection in development
+    if (import.meta.env.DEV) {
+      testAPIConnection()
+    }
   }, [])
 
   if (loading) {

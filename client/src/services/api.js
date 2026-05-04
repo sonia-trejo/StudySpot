@@ -54,64 +54,15 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
-
+      
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return data;
+      return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
-      console.log('Trying direct Supabase connection...');
-      
-      // Try direct Supabase connection for study spots
-      if (endpoint.includes('/study-spots')) {
-        try {
-          const params = new URLSearchParams(endpoint.split('?')[1] || '');
-          const searchParams = Object.fromEntries(params.entries());
-          return await this.getRealStudySpots(searchParams);
-        } catch (supabaseError) {
-          console.error('Supabase connection failed:', supabaseError);
-          throw new Error('Unable to connect to database. Please check your connection and try again.');
-        }
-      }
-      
-      // For specific study spot, use direct Supabase
-      if (endpoint.includes('/study-spots/') && endpoint.split('/').pop()) {
-        try {
-          const id = parseInt(endpoint.split('/').pop());
-          const { createClient } = await import('@supabase/supabase-js');
-          
-          const supabase = createClient(
-            'https://qeqpwqdnwbjsgldiorte.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlcXB3cWRud2Jqc2dsZGlvcnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjM4NDYsImV4cCI6MjA5MzEzOTg0Nn0.Ea3GLnoqhoAmzMUF2DK2iDLoqPYr_0_LHeuyUIslzmo'
-          );
-          
-          const { data, error } = await supabase
-            .from('study_spots')
-            .select('*')
-            .eq('id', id)
-            .single();
-          
-          if (error) throw error;
-          return data;
-        } catch (supabaseError) {
-          console.error('Supabase connection failed:', supabaseError);
-          throw new Error('Unable to fetch study spot details. Please try again.');
-        }
-      }
-      
-      // Return health check
-      if (endpoint.includes('/health')) {
-        return { 
-          status: 'healthy', 
-          timestamp: new Date().toISOString(),
-          message: 'StudySpot API is running (direct Supabase version)'
-        };
-      }
-      
-      throw error;
+      throw new Error(`Failed to connect to API: ${error.message}. Please check your connection and try again.`);
     }
   }
 
