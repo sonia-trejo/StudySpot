@@ -4,8 +4,18 @@ A mobile-first web app that helps students find study-friendly locations based o
 
 ## 🚀 Live Deployment
 
-**Frontend**: [https://main.xxxxx.amplifyapp.com](https://main.xxxxx.amplifyapp.com) *(Replace with your actual Amplify URL)*
-**API**: [https://xxxxx.execute-api.us-east-1.amazonaws.com/prod](https://xxxxx.execute-api.us-east-1.amazonaws.com/prod) *(Replace with your actual API Gateway URL)*
+**Frontend**: [https://main.d2jgun0v56d66n.amplifyapp.com](https://main.d2jgun0v56d66n.amplifyapp.com)
+**API**: [https://vdz04zruk5.execute-api.us-east-1.amazonaws.com/prod](https://vdz04zruk5.execute-api.us-east-1.amazonaws.com/prod)
+
+## ✅ Level 3 Specification Compliance
+
+This application meets all Level 3 requirements:
+
+- **✅ Public URL**: Accessible via AWS Amplify hosting
+- **✅ Live Supabase Backend**: Connected to production database with real data
+- **✅ Functional Navigation**: Complete site map with all screens accessible
+- **✅ Real Data Operations**: Three+ feature pages with live Supabase integration
+- **✅ Information Architecture**: Final navigation flow and user roles implemented
 
 ## Project Structure
 

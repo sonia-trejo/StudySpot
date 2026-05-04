@@ -167,11 +167,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <div style={{backgroundColor: 'lime', padding: '30px', margin: '20px', border: '5px solid purple', textAlign: 'center'}}>
-        <h1 style={{color: 'red', fontSize: '3em', backgroundColor: 'yellow', padding: '20px'}}>StudySpot - TEST DEPLOYMENT</h1>
-        <p style={{fontSize: '2em', color: 'blue'}}>IF YOU SEE THIS, DEPLOYMENT WORKS!</p>
-        <p style={{fontSize: '1.5em', color: 'green'}}>Current time: {new Date().toLocaleString()}</p>
-      </div>
+      <h1>StudySpot</h1>
       <p>Find the perfect study spot near you</p>
       
       {/* Location Search */}
