@@ -167,7 +167,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <h1>StudySpot</h1>
+      <h1 style={{color: 'red', fontSize: '3em', backgroundColor: 'yellow', padding: '20px'}}>StudySpot - TEST DEPLOYMENT</h1>
       <p>Find the perfect study spot near you</p>
       
       {/* Location Search */}
