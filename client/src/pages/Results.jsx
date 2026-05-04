@@ -21,35 +21,35 @@ const Results = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    const fetchStudySpots = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        // Build API parameters
-        const params = {
-          search: searchQuery || undefined,
-          noise_level: filters.noiseLevel || undefined,
-          wifi_available: filters.wifi ? true : undefined,
-          power_outlets: filters.outlets ? true : undefined,
-          sort_by: sortBy === 'closest' ? 'name' : sortBy === 'highest rated' ? 'rating' : sortBy,
-          order: sortBy === 'closest' ? 'asc' : 'desc'
-        }
-
-        // Remove undefined parameters
-        Object.keys(params).forEach(key => params[key] === undefined && delete params[key])
-
-        const response = await apiService.getStudySpots(params)
-        setStudySpots(response.study_spots || [])
-      } catch (err) {
-        setError('Failed to load study spots. Please try again.')
-        console.error('Error fetching study spots:', err)
-      } finally {
-        setLoading(false)
+  const fetchStudySpots = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Build API parameters
+      const params = {
+        search: searchQuery || undefined,
+        noise_level: filters.noiseLevel || undefined,
+        wifi_available: filters.wifi ? true : undefined,
+        power_outlets: filters.outlets ? true : undefined,
+        sort_by: sortBy === 'closest' ? 'name' : sortBy === 'highest rated' ? 'rating' : sortBy,
+        order: sortBy === 'closest' ? 'asc' : 'desc'
       }
-    }
 
+      // Remove undefined parameters
+      Object.keys(params).forEach(key => params[key] === undefined && delete params[key])
+
+      const response = await apiService.getStudySpots(params)
+      setStudySpots(response.study_spots || [])
+    } catch (err) {
+      setError('Failed to load study spots. Please try again.')
+      console.error('Error fetching study spots:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchStudySpots()
   }, [searchQuery, filters, sortBy])
 
@@ -83,7 +83,7 @@ const Results = () => {
       <div className="results-page">
         <h1>Search Results</h1>
         <div className="error">{error}</div>
-        <button className="btn btn-primary" onClick={() => window.location.reload()}>
+        <button className="btn btn-primary" onClick={fetchStudySpots}>
           Try Again
         </button>
       </div>

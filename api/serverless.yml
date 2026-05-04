@@ -1,0 +1,44 @@
+service: studyspot-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: prod
+  memorySize: 256
+  timeout: 30
+  
+  # Environment variables
+  environment:
+    NODE_ENV: production
+    
+  # IAM permissions
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource: 
+            - arn:aws:secretsmanager:us-east-1:846719029083:secret:studyspot/api/prod-glwtOB
+
+functions:
+  api:
+    handler: lambda.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    host: 0.0.0.0

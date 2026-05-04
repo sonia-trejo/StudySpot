@@ -1,27 +1,50 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import apiService from '../services/api'
+import { getCurrentLocation, filterNearbyLocations } from '../utils/geolocation'
 
 const Home = () => {
   const [studySpots, setStudySpots] = useState([])
+  const [nearbySpots, setNearbySpots] = useState([])
+  const [userLocation, setUserLocation] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [locationLoading, setLocationLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [showNearby, setShowNearby] = useState(false)
+
+  const fetchStudySpots = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await apiService.getStudySpots({ sort_by: 'rating', order: 'desc' })
+      setStudySpots(response.study_spots || [])
+    } catch (err) {
+      setError('Failed to load study spots. Please try again.')
+      console.error('Error fetching study spots:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLocationSearch = async () => {
+    try {
+      setLocationLoading(true)
+      const location = await getCurrentLocation()
+      setUserLocation(location)
+      
+      // Filter nearby locations (within 10km)
+      const nearby = filterNearbyLocations(studySpots, location.latitude, location.longitude, 10)
+      setNearbySpots(nearby)
+      setShowNearby(true)
+    } catch (err) {
+      console.error('Error getting location:', err)
+      alert('Unable to get your location. Please enable location access and try again.')
+    } finally {
+      setLocationLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchStudySpots = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await apiService.getStudySpots({ sort_by: 'rating', order: 'desc' })
-        setStudySpots(response.study_spots || [])
-      } catch (err) {
-        setError('Failed to load study spots. Please try again.')
-        console.error('Error fetching study spots:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchStudySpots()
   }, [])
 
@@ -51,17 +74,41 @@ const Home = () => {
       <h1>StudySpot</h1>
       <p>Find the perfect study spot near you</p>
       
+      {/* Location Search */}
+      <div className="location-search-section">
+        <button 
+          className="btn btn-primary location-btn" 
+          onClick={handleLocationSearch}
+          disabled={locationLoading}
+        >
+          {locationLoading ? 'Finding your location...' : '📍 Find Study Spots Near Me'}
+        </button>
+        {userLocation && (
+          <p className="location-info">
+            📍 Location found! Showing spots within 10km
+          </p>
+        )}
+      </div>
+      
       {/* Featured Study Spots */}
       <div className="featured-section">
-        <h2>Available Study Spots</h2>
-        <p className="section-description">Browse popular study locations in your area</p>
+        <h2>{showNearby ? 'Study Spots Near You' : 'Available Study Spots'}</h2>
+        <p className="section-description">
+          {showNearby 
+            ? `Found ${nearbySpots.length} study spots near your location`
+            : 'Browse popular study locations in your area'
+          }
+        </p>
         
         <div className="study-spots-grid">
-          {studySpots.slice(0, 6).map((spot) => (
+          {(showNearby ? nearbySpots : studySpots.slice(0, 6)).map((spot) => (
             <Link key={spot.id} to={`/location/${spot.id}`} className="study-spot-card">
               <div className="card-content">
                 <h3>{spot.name}</h3>
                 <p className="location">📍 {spot.location}</p>
+                {showNearby && spot.distance && (
+                  <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
+                )}
                 <div className="card-meta">
                   <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'N/A'}</span>
                   <span className="reviews">({spot.review_count || 0} reviews)</span>
