@@ -255,19 +255,41 @@ const Results = () => {
                   <div className="result-header">
                     <h3>{spot.name}</h3>
                     <div className="result-meta">
-                      <span className="rating">⭐ {spot.average_rating || 'No rating'}</span>
+                      <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'No rating'}</span>
                       <span className="review-count">({spot.review_count || 0} reviews)</span>
                     </div>
                   </div>
                   
-                  <div className="result-tags">
-                    {spot.wifi_available && <span className="tag">wifi</span>}
-                    {spot.power_outlets && <span className="tag">outlets</span>}
-                    <span className="tag">{spot.noise_level}</span>
+                  <div className="result-location">
+                    <p>📍 {spot.location}</p>
+                    {spot.distance && (
+                      <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
+                    )}
                   </div>
                   
-                  <div className="result-status">
-                    <span className="seating">Capacity: {spot.capacity}</span>
+                  <div className="result-tags">
+                    {spot.wifi_available && <span className="tag">📶 WiFi</span>}
+                    {spot.power_outlets && <span className="tag">🔌 Outlets</span>}
+                    <span className="tag">🔇 {spot.noise_level}</span>
+                  </div>
+                  
+                  <div className="result-details">
+                    <div className="detail-item">
+                      <span className="detail-label">Capacity:</span>
+                      <span className="detail-value">{spot.capacity} people</span>
+                    </div>
+                    {spot.amenities && (
+                      <div className="detail-item">
+                        <span className="detail-label">Amenities:</span>
+                        <span className="detail-value">{spot.amenities}</span>
+                      </div>
+                    )}
+                    {spot.seating_type && (
+                      <div className="detail-item">
+                        <span className="detail-label">Seating:</span>
+                        <span className="detail-value">{spot.seating_type}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="result-actions">

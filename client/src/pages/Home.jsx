@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import { getCurrentLocation, filterNearbyLocations } from '../utils/geolocation'
+import MapView from '../components/MapView'
 
 const Home = () => {
+  const navigate = useNavigate()
   const [studySpots, setStudySpots] = useState([])
   const [nearbySpots, setNearbySpots] = useState([])
   const [userLocation, setUserLocation] = useState(null)
@@ -11,6 +13,13 @@ const Home = () => {
   const [locationLoading, setLocationLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showNearby, setShowNearby] = useState(false)
+  const [viewMode, setViewMode] = useState('list')
+  const [locationInput, setLocationInput] = useState('')
+  const [locationSearching, setLocationSearching] = useState(false)
+
+  const handleSpotClick = (spot) => {
+    navigate(`/location/${spot.id}`)
+  }
 
   const fetchStudySpots = async () => {
     try {
@@ -41,6 +50,27 @@ const Home = () => {
       alert('Unable to get your location. Please enable location access and try again.')
     } finally {
       setLocationLoading(false)
+    }
+  }
+
+  const handleLocationSearchByInput = async () => {
+    if (!locationInput.trim()) {
+      alert('Please enter a city or zip code')
+      return
+    }
+
+    try {
+      setLocationSearching(true)
+      // For now, we'll simulate location search by filtering all spots
+      // In a real app, you'd use a geocoding API to convert city/zip to coordinates
+      const allSpots = studySpots
+      setNearbySpots(allSpots.slice(0, 3)) // Show first 3 spots as "nearby"
+      setShowNearby(true)
+    } catch (err) {
+      console.error('Error searching by location:', err)
+      alert('Unable to search for that location. Please try again.')
+    } finally {
+      setLocationSearching(false)
     }
   }
 
@@ -76,20 +106,61 @@ const Home = () => {
       
       {/* Location Search */}
       <div className="location-search-section">
+        <div className="location-input-group">
+          <input
+            type="text"
+            value={locationInput}
+            onChange={(e) => setLocationInput(e.target.value)}
+            placeholder="Enter city or zip code..."
+            className="location-input"
+          />
+          <button 
+            className="btn btn-primary search-btn" 
+            onClick={handleLocationSearchByInput}
+            disabled={locationSearching}
+          >
+            {locationSearching ? 'Searching...' : '🔍 Search'}
+          </button>
+        </div>
+        
+        <div className="location-divider">
+          <span>or</span>
+        </div>
+        
         <button 
-          className="btn btn-primary location-btn" 
+          className="btn btn-secondary location-btn" 
           onClick={handleLocationSearch}
           disabled={locationLoading}
         >
-          {locationLoading ? 'Finding your location...' : '📍 Find Study Spots Near Me'}
+          {locationLoading ? 'Finding your location...' : '📍 Use My Current Location'}
         </button>
-        {userLocation && (
+        
+        {(userLocation || showNearby) && (
           <p className="location-info">
-            📍 Location found! Showing spots within 10km
+            📍 {userLocation ? 'Location found!' : `Showing ${nearbySpots.length} study spots`}
+            {userLocation && ' Showing spots within 10km'}
           </p>
         )}
       </div>
       
+      {/* View Toggle */}
+      {(showNearby || studySpots.length > 0) && (
+        <div className="view-toggle">
+          <button 
+            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => setViewMode('list')}
+          >
+            📋 List View
+          </button>
+          <button 
+            className={`view-toggle-btn ${viewMode === 'map' ? 'active' : ''}`}
+            onClick={() => setViewMode('map')}
+          >
+            🗺️ Map View
+          </button>
+        </div>
+      )}
+
       {/* Featured Study Spots */}
       <div className="featured-section">
         <h2>{showNearby ? 'Study Spots Near You' : 'Available Study Spots'}</h2>
@@ -100,34 +171,36 @@ const Home = () => {
           }
         </p>
         
-        <div className="study-spots-grid">
-          {(showNearby ? nearbySpots : studySpots.slice(0, 6)).map((spot) => (
-            <Link key={spot.id} to={`/location/${spot.id}`} className="study-spot-card">
-              <div className="card-content">
-                <h3>{spot.name}</h3>
-                <p className="location">📍 {spot.location}</p>
-                {showNearby && spot.distance && (
-                  <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
-                )}
-                <div className="card-meta">
-                  <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'N/A'}</span>
-                  <span className="reviews">({spot.review_count || 0} reviews)</span>
+        {viewMode === 'list' ? (
+          <div className="study-spots-grid">
+            {(showNearby ? nearbySpots : studySpots.slice(0, 6)).map((spot) => (
+              <Link key={spot.id} to={`/location/${spot.id}`} className="study-spot-card">
+                <div className="card-content">
+                  <h3>{spot.name}</h3>
+                  <p className="location">📍 {spot.location}</p>
+                  {showNearby && spot.distance && (
+                    <p className="distance">📏 {spot.distance.toFixed(1)} km away</p>
+                  )}
+                  <div className="card-meta">
+                    <span className="rating">⭐ {spot.average_rating?.toFixed(1) || 'N/A'}</span>
+                    <span className="reviews">({spot.review_count || 0} reviews)</span>
+                  </div>
+                  <div className="features">
+                    {spot.wifi_available && <span className="feature">WiFi</span>}
+                    {spot.power_outlets && <span className="feature">Outlets</span>}
+                    <span className="feature">{spot.noise_level}</span>
+                  </div>
                 </div>
-                <div className="features">
-                  {spot.wifi_available && <span className="feature">WiFi</span>}
-                  {spot.power_outlets && <span className="feature">Outlets</span>}
-                  <span className="feature">{spot.noise_level}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        
-        {studySpots.length > 6 && (
-          <div className="view-all-section">
-            <Link to="/results" className="btn btn-primary btn-large">
-              View All Study Spots ({studySpots.length} total)
-            </Link>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="map-view-container">
+            <MapView 
+              studySpots={showNearby ? nearbySpots : studySpots.slice(0, 6)} 
+              onSpotClick={handleSpotClick}
+              userLocation={userLocation}
+            />
           </div>
         )}
       </div>
