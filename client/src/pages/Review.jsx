@@ -114,7 +114,7 @@ const Review = () => {
         rating: formData.rating,
         noise_level: formData.noiseLevel,
         wifi_quality: formData.wifiQuality,
-        outlets: formData.outlets,
+        outlets: formData.outlets === 'available' ? 'plenty' : formData.outlets,
         crowding: formData.crowding,
         time_visited: formData.timeVisited,
         visit_type: formData.visitType,
