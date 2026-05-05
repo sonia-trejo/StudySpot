@@ -1,4 +1,4 @@
-service: studyspot-api
+service: studyspot-api-fixed
 
 frameworkVersion: '3'
 

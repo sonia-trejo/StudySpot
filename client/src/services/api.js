@@ -1,5 +1,5 @@
 // API service for StudySpot client
-const API_BASE_URL = 'https://vdz04zruk5.execute-api.us-east-1.amazonaws.com/prod/api';
+const API_BASE_URL = 'https://rwyer8alwl.execute-api.us-east-1.amazonaws.com';
 
 class ApiService {
   constructor() {
