@@ -10,6 +10,22 @@ provider:
   memorySize: 256
   timeout: 30
   
+  # CORS configuration
+  httpApi:
+    cors:
+      allowedOrigins:
+        - https://main.d2jgun0v56d66n.amplifyapp.com
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowCredentials: true
+  
   # Environment variables
   environment:
     NODE_ENV: production
